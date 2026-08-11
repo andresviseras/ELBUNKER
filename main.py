@@ -1,3 +1,4 @@
+import os
 import json
 import random
 import google.generativeai as genai
@@ -7,7 +8,11 @@ from fastapi.responses import FileResponse
 # CONFIGURACIÓN
 # Pon MOCK_MODE = False cuando subas el juego de verdad
 MOCK_MODE = False
-genai.configure(api_key="TU_API_KEY_AQUI")
+
+# Sistema de seguridad: lee la clave desde Render, no desde el código
+api_key = os.environ.get("GEMINI_API_KEY")
+genai.configure(api_key=api_key)
+
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 app = FastAPI()
