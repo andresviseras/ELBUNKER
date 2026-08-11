@@ -124,7 +124,6 @@ async def generate_and_distribute_roles(players: list):
         "Una pandemia de un virus zombificador. Las reservas de raciones y supresores de infección limitan la supervivencia a exactamente la mitad del grupo.",
         "Una rebelión de inteligencias artificiales. El generador del viejo búnker es débil y colapsará si detecta el peso y calor de más de la mitad de vosotros.",
         "Un colapso ecológico sin agua. El destilador está al límite de su capacidad y el agua reciclada solo da para hidratar a la mitad del grupo sin provocar fallos renales.",
-        "Una invasión alienígena inminente. El refugio es en realidad la última cápsula de escape orbital, y solo tiene líquido de criosueño para la mitad."
     ]
     escenario_actual = random.choice(escenarios)
 
@@ -177,6 +176,7 @@ async def generate_and_distribute_roles(players: list):
         for player_name, role_data in data["jugadores"].items():
             await game.send_personal(player_name, {
                 "type": "role_reveal",
+                "escenario": escenario_actual,
                 "data": role_data
             })
     except Exception as e:

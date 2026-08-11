@@ -52,6 +52,14 @@
         <div id="screen-role" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(34,197,94,0.3)] border border-green-700">
             <h2 class="text-2xl font-black text-center text-green-400 mb-6 tracking-wide">CONFIDENCIAL</h2>
             
+            <!-- NUEVA LÍNEA PARA EL NOMBRE -->
+            <p class="text-center text-gray-400 text-sm mb-6 uppercase tracking-widest">Agente: <span id="displayMyNameRole" class="text-white font-bold"></span></p>
+
+            <div class="bg-gray-800 rounded-2xl p-4 mb-6 border border-gray-600 shadow-md">
+                <h3 class="text-gray-400 font-bold text-xs uppercase tracking-wider mb-1">🌍 Crisis Actual</h3>
+                <p class="text-gray-200 text-sm italic" id="role-scenario">...</p>
+            </div>
+
             <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-blue-500 shadow-md">
                 <h3 id="role-title-display" class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-2">🛠️ Habilidad Vital</h3>
                 <p class="text-gray-200 text-sm" id="role-skill">...</p>
@@ -121,6 +129,8 @@
             }
 
             document.getElementById('displayRoom').innerText = room.toUpperCase();
+            document.getElementById('displayMyNameLobby').innerText = myName;
+            document.getElementById('displayMyNameRole').innerText = myName;
             showScreen('screen-lobby');
             
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -150,6 +160,8 @@
                 }
                 
                 if(msg.type === "role_reveal") {
+                    // Inyectar el escenario actual
+                    document.getElementById('role-scenario').innerText = msg.escenario;
                     // Inyectar el título del rol dinámicamente
                     document.getElementById('role-title-display').innerText = "🛠️ Habilidad: " + msg.data.rol.toUpperCase();
                     
