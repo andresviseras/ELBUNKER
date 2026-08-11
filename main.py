@@ -136,16 +136,16 @@ async def generate_and_distribute_roles(players: list, escenario_actual: str):
 
     Tu objetivo es generar un debate brutal, estratégico y lleno de paranoia. Diseña los roles aplicando esta lógica de juego:
 
-    1. HABILIDADES LARGAS Y MULTIUSOS: Todos los roles deben aportar varios beneficios físicos y críticos. La habilidad debe detallar varias razones distintas por las que son útiles para el grupo, dando múltiples argumentos para defender su supervivencia.
+    1. HABILIDADES CONCISAS Y DIRECTAS: Todos los roles deben aportar beneficios físicos y críticos claros, pero sin florituras. Cero relleno literario. Directo al grano.
     2. DEFECTOS FUTUROS (EL PELIGRO LATENTE): Los defectos NO deben ser cosas que ya han pasado. Deben ser acciones catastróficas, enfermedades o traiciones que HARÁN o que PASARÁN de forma inevitable UNA VEZ estén dentro del búnker (ej. "Si te dejan entrar, sabotearás...", "Cuando lleves un mes dentro, te volverás loco y..."). IMPORTANTE: Desvincula la utilidad de la gravedad. Un rol vital puede tener un defecto inofensivo, y un rol mediocre puede ser la mayor amenaza. ¡Rompe los patrones! Vincula la gravedad de manera impredecible, siempre aleatorio.
     3. AL MENOS UN PELIGRO LETAL EXTREMO: Entre todos los jugadores, SIEMPRE debe haber al menos un defecto que sea una amenaza de muerte directa para el grupo (un asesino en serie oculto, un psicópata, un traidor que abrirá las puertas al enemigo, o un infectado en fase terminal).
-    4. INTERACCIONES DE NEUTRALIZACIÓN O DETONACIÓN: De forma ocasional, diseña los roles para que la habilidad de un jugador interactúe con el defecto de otro. Puede ser para bien (ej. un psiquiatra que es el único capaz de contener al asesino en serie) o para mal (ej. el trabajo ruidoso del mecánico detona los nervios del jugador inestable).
-        Si la habilidad de un jugador neutraliza el defecto de otro (y por tanto deben sobrevivir juntos), el MECANISMO EXACTO de esa neutralización DEBE estar escrito explícitamente en el texto de su 'habilidad'. Por ejemplo: si el defecto de A es "robar medicinas", la habilidad de B debe mencionar literalmente que "almacena los recursos en una caja fuerte biométrica inexpugnable". No inventes soluciones en el veredicto final que no estén respaldadas palabra por palabra en los textos de los jugadores.
+    4. INTERACCIONES DE NEUTRALIZACIÓN O DETONACIÓN (SOLO OCASIONALES): DE FORMA OCASIONAL (no en todos los jugadores, solo en unos pocos para añadir estrategia), diseña roles para que la habilidad de un jugador interactúe con el defecto de otro. Puede ser para bien o para mal.
+        Si decides que la habilidad de un jugador neutraliza el defecto de otro, el MECANISMO EXACTO de esa neutralización DEBE estar escrito explícitamente en el texto de su 'habilidad'. Por ejemplo: si el defecto de A es "robar medicinas", la habilidad de B debe mencionar literalmente que "almacena los recursos en una caja fuerte biométrica inexpugnable". No inventes soluciones en el veredicto final que no estén respaldadas palabra por palabra en los textos de los jugadores.
     5. RED DE CHANTAJE CIRCULAR (CERO PAREJAS): Está PROHIBIDO cruzar secretos mutuamente (Si A sabe el de B, B no puede saber el de A). Debes crear una cadena de extorsión (A sabe de B, B sabe de C, C sabe de D...). Asegúrate de que los jugadores con los roles más prescindibles reciban los secretos de los jugadores más vitales.
 
     Genera para CADA jugador un rol siguiendo ESTRICTAMENTE estas reglas de formato gramatical y longitud:
-    1. 'rol': El título oficial y técnico del cargo (ej. 'Ingeniero de Sistemas', 'Especialista en Cultivos').
-    2. 'habilidad': PRIMERA PERSONA. EXTENSIÓN MEDIA (3 a 5 frases). Da varias razones concretas y detalladas de por qué tu rol es versátil y tu supervivencia es indispensable.
+    1. 'rol': El título oficial y técnico del cargo (ej. 'Ingeniero de Sistemas').
+    2. 'habilidad': PRIMERA PERSONA. CONCISA Y AL GRANO (MÁXIMO 3 ORACIONES). Explica tu utilidad vital y, si corresponde a una neutralización, describe tu herramienta física o mecanismo de seguridad específico. Ni una palabra de más.
     3. 'defecto': SEGUNDA PERSONA. MUY CORTO (1 frase). Redactado en FUTURO o CONDICIONAL sobre lo que harás o te pasará dentro.
     4. 'secreto_de_otro': TERCERA PERSONA. MUY CORTO. Es el 'defecto' de OTRO jugador distinto, respetando estrictamente la cadena circular.
 
@@ -167,6 +167,7 @@ async def generate_and_distribute_roles(players: list, escenario_actual: str):
       }}
     }}
     """
+
     
     try:
         response = model.generate_content(prompt, generation_config={"temperature": 0.9})
