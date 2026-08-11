@@ -5,7 +5,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 
 # CONFIGURACIÓN
-# Pon MOCK_MODE = False cuando vayas a jugar de verdad
+# Pon MOCK_MODE = False cuando subas el juego de verdad
 MOCK_MODE = True
 genai.configure(api_key="TU_API_KEY_AQUI")
 model = genai.GenerativeModel('gemini-1.5-flash')
@@ -15,14 +15,27 @@ app = FastAPI()
 class GameManager:
     def __init__(self):
         self.active_players: dict[str, WebSocket] = {}
+        self.host: str = None  # El líder de la sala
+        self.veredicto_secreto = None
 
     async def connect(self, websocket: WebSocket, name: str):
         await websocket.accept()
         self.active_players[name] = websocket
+        
+        # El primero en entrar se convierte en el host
+        if not self.host:
+            self.host = name
 
     def disconnect(self, name: str):
         if name in self.active_players:
             del self.active_players[name]
+        
+        # Si el host se desconecta, pasamos el liderazgo al siguiente (si hay)
+        if name == self.host:
+            if self.active_players:
+                self.host = list(self.active_players.keys())[0]
+            else:
+                self.host = None
 
     async def broadcast(self, message: dict):
         for connection in self.active_players.values():
@@ -42,92 +55,114 @@ async def get_index():
 async def websocket_endpoint(websocket: WebSocket, player_name: str):
     await game.connect(websocket, player_name)
     
-    players_list = list(game.active_players.keys())
-    await game.broadcast({"type": "lobby_update", "players": players_list})
+    # Enviamos a todos la lista actualizada Y quién es el host
+    await game.broadcast({
+        "type": "lobby_update", 
+        "players": list(game.active_players.keys()),
+        "host": game.host
+    })
     
     try:
         while True:
             data = await websocket.receive_text()
             msg = json.loads(data)
             
-            if msg.get("action") == "start_game":
-                await game.broadcast({"type": "game_starting"})
-                await generate_and_distribute_roles(list(game.active_players.keys()))
+            # Solo el host puede ejecutar las acciones de control
+            if player_name == game.host:
+                if msg.get("action") == "start_game":
+                    await game.broadcast({"type": "game_starting"})
+                    await generate_and_distribute_roles(list(game.active_players.keys()))
+                    
+                if msg.get("action") == "reveal_verdict":
+                    if game.veredicto_secreto:
+                        await game.broadcast({
+                            "type": "show_verdict", 
+                            "data": game.veredicto_secreto
+                        })
                 
     except WebSocketDisconnect:
         game.disconnect(player_name)
-        await game.broadcast({"type": "lobby_update", "players": list(game.active_players.keys())})
+        await game.broadcast({
+            "type": "lobby_update", 
+            "players": list(game.active_players.keys()),
+            "host": game.host
+        })
 
 async def generate_and_distribute_roles(players: list):
     if len(players) < 2:
         return
         
-    # MODO PRUEBAS: Datos falsos sin gastar API
     if MOCK_MODE:
         print("Generando roles en MOCK MODE...")
+        game.veredicto_secreto = {
+            "supervivientes_ideales": ["Jugador de Prueba 1", "Jugador de Prueba 2"],
+            "explicacion": "Esta es la explicación generada de prueba. El médico debía salvarse y el infectado debía morir."
+        }
         for i, player_name in enumerate(players):
             target = players[(i + 1) % len(players)]
             await game.send_personal(player_name, {
                 "type": "role_reveal",
                 "data": {
-                    "habilidad": f"Soy el mejor cocinero del mundo. Esta es una habilidad de prueba generada para {player_name}. Si me dejáis fuera, comeréis latas frías para siempre.",
-                    "defecto": "Tienes fobia a la oscuridad y gritas si se apaga la luz.",
-                    "secreto_de_otro": f"Sabes que {target} está infectado."
+                    "habilidad": f"Soy un ingeniero eléctrico vital. (Mock {player_name})",
+                    "defecto": "Tienes ataques de pánico.",
+                    "secreto_de_otro": f"Sabes que {target} roba comida por la noche."
                 }
             })
         return
 
-    # 1. INYECTAR CAOS: Escenarios con justificación de por qué solo entra la mitad
     escenarios = [
-        "Ha ocurrido un evento apocalíptico masivo. El grupo ha encontrado un refugio seguro, pero hay un problema físico grave: el búnker es muy pequeño y no hay espacio para todos. Solo la mitad exacta del grupo podrá cruzar las puertas y sobrevivir, el resto se quedará fuera a su suerte.",
-        "Un invierno nuclear. El sistema de filtrado de aire del búnker está gravemente dañado. Matemáticamente, solo puede depurar el CO2 suficiente para mantener viva a la mitad del grupo; si entra una persona más, todos morirán asfixiados.",
-        "Una pandemia de un virus zombificador. El refugio es impenetrable, pero las reservas de raciones no perecederas y los supresores de infección limitan la supervivencia. Solo hay recursos para que la mitad del grupo aguante el invierno.",
-        "Una rebelión de inteligencias artificiales asesinas. El generador de campo electromagnético del viejo búnker es débil y colapsará si detecta la firma térmica y el peso de más de la mitad del grupo.",
-        "Un colapso ecológico total sin agua potable. El destilador de fluidos está al límite de su capacidad operativa. El agua reciclada generada solo da para hidratar a la mitad del grupo sin fallos renales.",
-        "Una invasión alienígena inminente. El 'búnker' es en realidad la última cápsula de escape hacia la estación orbital, y solo tiene asientos y líquido de criosueño intactos para la mitad de los presentes."
+        "Ha ocurrido un evento apocalíptico masivo. El grupo ha encontrado un refugio seguro, pero el búnker es muy pequeño y no hay espacio para todos. Solo la mitad exacta del grupo podrá cruzar las puertas.",
+        "Un invierno nuclear. El sistema de filtrado de aire está gravemente dañado y solo puede depurar el CO2 para mantener viva a la mitad del grupo; si entra una persona más, moriréis asfixiados.",
+        "Una pandemia de un virus zombificador. Las reservas de raciones y supresores de infección limitan la supervivencia a exactamente la mitad del grupo.",
+        "Una rebelión de inteligencias artificiales. El generador del viejo búnker es débil y colapsará si detecta el peso y calor de más de la mitad de vosotros.",
+        "Un colapso ecológico sin agua. El destilador está al límite de su capacidad y el agua reciclada solo da para hidratar a la mitad del grupo sin provocar fallos renales.",
+        "Una invasión alienígena inminente. El refugio es en realidad la última cápsula de escape orbital, y solo tiene líquido de criosueño para la mitad."
     ]
     escenario_actual = random.choice(escenarios)
 
-    # 2. EL CEREBRO: Reglas de diseño y formato
     prompt = f"""
     Eres el Game Master de un juego de supervivencia. 
     El escenario actual es: {escenario_actual}.
     Los jugadores son: {', '.join(players)}.
     REGLA DE ORO: Solo la mitad exacta de estos jugadores puede sobrevivir.
 
-    Para generar un debate caótico, de deducción social y lleno de paranoia, aplica estas dinámicas de diseño de roles:
-    1. Distribución Caótica y Equilibrio Tóxico: Mezcla los perfiles para que no haya patrones obvios. Algunos tendrán una habilidad vital y un defecto catastrófico (ej. médico asesino), otros habilidades secundarias con defectos leves, etc.
-    2. Roles Solapados (Competencia): Crea al menos un par de roles que sirvan para lo mismo pero de distinta forma (ej. dos proveedores de comida o dos ingenieros distintos). Solo uno será necesario.
-    3. Roles Dependientes: Crea habilidades que necesiten de otro jugador para funcionar al 100% (ej. cirujano que necesita a quien fabrica anestesia).
-    4. Perfiles Tácticos, no inútiles: Incluso las habilidades secundarias (contable, profesor, jardinero, cocinero) deben tener un discurso de venta brillante. Deben retorcer la utilidad de su profesión para defender que la moral, el racionamiento o la organización son imprescindibles.
-    5. Seguridad Interna (Opcional): Si encaja, asigna a alguien encargado de la fuerza bruta o seguridad, inútil para el mantenimiento técnico, pero el único capaz de lidiar físicamente con compañeros que tengan defectos peligrosos.
+    Aplica estas dinámicas de diseño de roles:
+    1. Distribución Caótica y Equilibrio Tóxico: Mezcla perfiles. Algunos tendrán habilidad vital y defecto catastrófico, otros habilidades secundarias con defectos leves.
+    2. Roles Solapados (Competencia): Crea roles que sirvan para lo mismo pero de distinta forma (ej. dos proveedores de recursos distintos).
+    3. Roles Dependientes: Crea habilidades que necesiten de otro jugador para funcionar.
+    4. Perfiles Tácticos: Las habilidades secundarias (contable, profesor, jardinero) deben tener un discurso de venta brillante.
+    5. Seguridad Interna: Si encaja, asigna a alguien encargado de la fuerza física, el único capaz de lidiar con compañeros peligrosos.
     
-    Genera para CADA jugador un rol siguiendo ESTRICTAMENTE estas reglas de formato gramatical y de longitud:
-    1. 'habilidad': Redactado en PRIMERA PERSONA. Debe ser un texto LARGO (3 o 4 frases), muy detallado, persuasivo y épico. Es el discurso exacto que el jugador leerá para convencer al resto de que debe entrar.
-    2. 'defecto': Redactado en SEGUNDA PERSONA. MUY CORTO y directo (1 frase). 
-    3. 'secreto_de_otro': Redactado en TERCERA PERSONA. MUY CORTO. Es el 'defecto' exacto de OTRO jugador distinto. Todos los secretos se deben cruzar entre todos los jugadores para que existan chantajes.
+    Genera para CADA jugador un rol siguiendo ESTRICTAMENTE estas reglas:
+    1. 'habilidad': PRIMERA PERSONA. LARGO (3 o 4 frases), muy detallado y persuasivo.
+    2. 'defecto': SEGUNDA PERSONA. MUY CORTO y directo (1 frase). 
+    3. 'secreto_de_otro': TERCERA PERSONA. MUY CORTO. Es el 'defecto' de OTRO jugador distinto. (Cruza todos los secretos).
     
+    Además, diseña la SOLUCIÓN IDEAL eligiendo exactamente a la mitad de los jugadores que garantizan la supervivencia a largo plazo.
+
     Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta, sin texto extra ni formato markdown:
     {{
       "jugadores": {{
         "NombreJugador1": {{
           "habilidad": "texto largo en primera persona...",
-          "defecto": "texto corto en segunda persona.",
-          "secreto_de_otro": "texto corto en tercera persona."
+          "defecto": "texto corto en segunda persona...",
+          "secreto_de_otro": "texto corto en tercera persona..."
         }}
+      }},
+      "veredicto_ia": {{
+        "supervivientes_ideales": ["Nombre1", "Nombre2"],
+        "explicacion": "Una justificación dramática y detallada de por qué esta combinación era la correcta."
       }}
     }}
     """
     
     try:
-        # 3. CREATIVIDAD: Subimos la temperatura a 0.9 para máxima variedad
-        response = model.generate_content(
-            prompt,
-            generation_config={"temperature": 0.9}
-        )
-        
+        response = model.generate_content(prompt, generation_config={"temperature": 0.9})
         raw_json = response.text.replace("```json", "").replace("```", "").strip()
         data = json.loads(raw_json)
+        
+        # Guardamos la solución correcta en la memoria del servidor
+        game.veredicto_secreto = data.get("veredicto_ia")
         
         for player_name, role_data in data["jugadores"].items():
             await game.send_personal(player_name, {

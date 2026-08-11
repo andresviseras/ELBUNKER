@@ -12,7 +12,6 @@
 </head>
 <body class="bg-gray-950 text-white font-sans antialiased min-h-screen flex items-center justify-center p-4">
 
-    <!-- CONTENEDOR PRINCIPAL -->
     <div class="w-full max-w-md w-full">
 
         <!-- PANTALLA 1: LOGIN -->
@@ -21,9 +20,9 @@
             <p class="text-gray-400 mb-8 text-sm">Edición Secretos y Traiciones</p>
             
             <div class="space-y-4">
-                <input type="text" id="playerName" placeholder="Tu nombre..." class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all text-center text-lg font-bold">
+                <input type="text" id="playerName" placeholder="Tu nombre..." class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 transition-all text-center text-lg font-bold">
                 
-                <input type="text" id="roomCode" placeholder="Código de Sala (ej. ABCD)" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all text-center tracking-widest uppercase font-bold">
+                <input type="text" id="roomCode" placeholder="Código de Sala" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 transition-all text-center tracking-widest uppercase font-bold">
                 
                 <button onclick="joinRoom()" class="w-full mt-4 bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(220,38,38,0.6)] transition-all text-lg transform hover:scale-105 active:scale-95">
                     ENTRAR AL BÚNKER
@@ -31,19 +30,22 @@
             </div>
         </div>
 
-        <!-- PANTALLA 2: LOBBY (SALA DE ESPERA) -->
+        <!-- PANTALLA 2: LOBBY -->
         <div id="screen-lobby" class="hidden fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(59,130,246,0.3)] border border-blue-900 text-center">
             <h2 class="text-2xl font-bold text-blue-400 mb-4">Sala: <span id="displayRoom" class="text-white">---</span></h2>
             
             <div class="animate-pulse bg-gray-800 rounded-xl p-6 mb-6">
-                <p id="lobbyStatus" class="text-gray-300">Esperando a que el Game Master inicie la partida...</p>
-                <p class="text-sm text-gray-500 mt-2">Mírate las caras con tus amigos mientras podáis.</p>
-                <p class="text-green-400 font-bold mt-4">Jugadores: <span id="playersList">Tú</span></p>
+                <p id="lobbyStatus" class="text-gray-300">Conectado. Esperando jugadores...</p>
+                <p class="text-green-400 font-bold mt-4">Jugadores: <span id="playersList" class="text-white"></span></p>
             </div>
 
-            <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.6)] transition-all text-lg transform hover:scale-105 active:scale-95">
+            <!-- Controles dinámicos de Host -->
+            <button id="btn-start" onclick="startGame()" class="hidden w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.6)] transition-all text-lg transform hover:scale-105 active:scale-95">
                 ¡EMPEZAR PARTIDA!
             </button>
+            <p id="text-waiting-host" class="hidden text-gray-400 text-sm font-bold animate-pulse">
+                Esperando a que el anfitrión inicie la partida...
+            </p>
         </div>
 
         <!-- PANTALLA 3: TU ROL -->
@@ -52,18 +54,46 @@
             
             <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-blue-500 shadow-md">
                 <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-2">🛠️ Habilidad Vital</h3>
-                <p class="text-gray-200" id="role-skill">...</p>
+                <p class="text-gray-200 text-sm" id="role-skill">...</p>
             </div>
 
             <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-red-500 shadow-md">
                 <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-2">⚠️ Defecto Fatal</h3>
-                <p class="text-gray-200" id="role-flaw">...</p>
+                <p class="text-gray-200 text-sm" id="role-flaw">...</p>
             </div>
 
-            <div class="bg-gray-800 rounded-2xl p-5 border-l-4 border-purple-500 shadow-md">
-                <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-2">👁️ El Secreto de Otro</h3>
-                <p class="text-gray-200" id="role-secret">...</p>
+            <div class="bg-gray-800 rounded-2xl p-5 mb-6 border-l-4 border-purple-500 shadow-md">
+                <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-2">👁️ Secreto de Otro</h3>
+                <p class="text-gray-200 text-sm" id="role-secret">...</p>
             </div>
+
+            <!-- Controles dinámicos de Host -->
+            <button id="btn-end" onclick="revealVerdict()" class="hidden w-full bg-red-700 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg border border-red-500">
+                💀 VER VEREDICTO IA
+            </button>
+            <p id="text-waiting-end" class="hidden text-center text-gray-400 text-xs mt-2">
+                ⏳ El anfitrión revelará el veredicto tras el debate...
+            </p>
+        </div>
+
+        <!-- PANTALLA 4: VEREDICTO -->
+        <div id="screen-verdict" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(234,179,8,0.3)] border border-yellow-600">
+            <h2 class="text-3xl font-black text-center text-yellow-500 mb-2 uppercase tracking-widest">El Veredicto</h2>
+            <p class="text-gray-400 text-center text-sm mb-6">Esta era la única solución correcta...</p>
+            
+            <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-yellow-500 shadow-md">
+                <h3 class="text-yellow-400 font-bold text-sm uppercase tracking-wider mb-2">🏆 Equipo Ideal</h3>
+                <p class="text-white font-bold text-lg" id="verdict-survivors">...</p>
+            </div>
+
+            <div class="bg-gray-800 rounded-2xl p-5 shadow-md">
+                <h3 class="text-gray-400 font-bold text-sm uppercase tracking-wider mb-2">📜 Justificación</h3>
+                <p class="text-gray-300 text-sm leading-relaxed" id="verdict-explanation">...</p>
+            </div>
+            
+            <button onclick="location.reload()" class="w-full mt-6 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-all">
+                VOLVER A JUGAR
+            </button>
         </div>
 
     </div>
@@ -71,11 +101,13 @@
     <script>
         let ws;
         let myName = "";
+        let hostName = "";
 
         function showScreen(screenId) {
             document.getElementById('screen-login').classList.add('hidden');
             document.getElementById('screen-lobby').classList.add('hidden');
             document.getElementById('screen-role').classList.add('hidden');
+            document.getElementById('screen-verdict').classList.add('hidden');
             document.getElementById(screenId).classList.remove('hidden');
         }
 
@@ -91,7 +123,6 @@
             document.getElementById('displayRoom').innerText = room.toUpperCase();
             showScreen('screen-lobby');
             
-            // Lógica inteligente para saber si usa ws:// (local) o wss:// (internet)
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = window.location.host; 
             ws = new WebSocket(`${protocol}//${host}/ws/${myName}`);
@@ -100,8 +131,18 @@
                 const msg = JSON.parse(event.data);
                 
                 if(msg.type === "lobby_update") {
-                    const list = msg.players.join(", ");
-                    document.getElementById('playersList').innerText = list;
+                    document.getElementById('playersList').innerText = msg.players.join(", ");
+                    hostName = msg.host;
+                    
+                    // Mostrar botones solo al Host
+                    if(myName === hostName) {
+                        document.getElementById('btn-start').classList.remove('hidden');
+                        document.getElementById('text-waiting-host').classList.add('hidden');
+                    } else {
+                        document.getElementById('btn-start').classList.add('hidden');
+                        document.getElementById('text-waiting-host').classList.remove('hidden');
+                        document.getElementById('text-waiting-host').innerText = `Esperando a que ${hostName} inicie...`;
+                    }
                 }
                 
                 if(msg.type === "game_starting") {
@@ -112,13 +153,36 @@
                     document.getElementById('role-skill').innerText = msg.data.habilidad;
                     document.getElementById('role-flaw').innerText = msg.data.defecto;
                     document.getElementById('role-secret').innerText = msg.data.secreto_de_otro;
+                    
+                    // Lógica del host para la pantalla de rol
+                    if(myName === hostName) {
+                        document.getElementById('btn-end').classList.remove('hidden');
+                        document.getElementById('text-waiting-end').classList.add('hidden');
+                    } else {
+                        document.getElementById('btn-end').classList.add('hidden');
+                        document.getElementById('text-waiting-end').classList.remove('hidden');
+                        document.getElementById('text-waiting-end').innerText = `Solo ${hostName} puede terminar el debate.`;
+                    }
+                    
                     showScreen('screen-role');
+                }
+
+                if(msg.type === "show_verdict") {
+                    document.getElementById('verdict-survivors').innerText = msg.data.supervivientes_ideales.join(" - ");
+                    document.getElementById('verdict-explanation').innerText = msg.data.explicacion;
+                    showScreen('screen-verdict');
                 }
             };
         }
 
         function startGame() {
             if(ws) ws.send(JSON.stringify({action: "start_game"}));
+        }
+
+        function revealVerdict() {
+            if(confirm("¿Habéis terminado de votar? Esto revelará la respuesta de la IA a todo el mundo.")) {
+                if(ws) ws.send(JSON.stringify({action: "reveal_verdict"}));
+            }
         }
     </script>
 </body>
