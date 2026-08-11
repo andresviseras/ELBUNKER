@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 
 # CONFIGURACIÓN
 # Pon MOCK_MODE = False cuando subas el juego de verdad
-MOCK_MODE = True
+MOCK_MODE = False
 genai.configure(api_key="TU_API_KEY_AQUI")
 model = genai.GenerativeModel('gemini-1.5-flash')
 
