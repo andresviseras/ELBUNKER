@@ -6,13 +6,15 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 
 # CONFIGURACIÓN
-# Pon MOCK_MODE = False cuando subas el juego de verdad
+# Cambia a True SOLO si quieres probar en tu ordenador sin usar la API.
+# Déjalo en False para subir a Render.
 MOCK_MODE = False
 
-# Sistema de seguridad: lee la clave desde Render, no desde el código
+# Sistema de seguridad: lee la clave desde las Variables de Entorno de Render
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
+# Usamos el modelo más avanzado recomendado para razonamiento complejo
 model = genai.GenerativeModel('gemini-3.5-flash')
 
 app = FastAPI()
@@ -101,16 +103,17 @@ async def generate_and_distribute_roles(players: list):
         print("Generando roles en MOCK MODE...")
         game.veredicto_secreto = {
             "supervivientes_ideales": ["Jugador de Prueba 1", "Jugador de Prueba 2"],
-            "explicacion": "Esta es la explicación generada de prueba. El médico debía salvarse y el infectado debía morir."
+            "explicacion": "Esta es la explicación generada de prueba. La estrategia ganadora era la A."
         }
         for i, player_name in enumerate(players):
             target = players[(i + 1) % len(players)]
             await game.send_personal(player_name, {
                 "type": "role_reveal",
                 "data": {
-                    "habilidad": f"Soy un ingeniero eléctrico vital. (Mock {player_name})",
-                    "defecto": "Tienes ataques de pánico.",
-                    "secreto_de_otro": f"Sabes que {target} roba comida por la noche."
+                    "rol": "Especialista de Prueba",
+                    "habilidad": f"Sé exactamente cómo hacer funcionar el búnker. (Mock {player_name})",
+                    "defecto": "Tienes ataques de pánico repentinos.",
+                    "secreto_de_otro": f"Sabes que {target} roba raciones de agua por la noche."
                 }
             })
         return
@@ -126,37 +129,39 @@ async def generate_and_distribute_roles(players: list):
     escenario_actual = random.choice(escenarios)
 
     prompt = f"""
-    Eres el Game Master de un juego de supervivencia. 
-    El escenario actual es: {escenario_actual}.
+    Eres el Game Master implacable de un juego de deducción social y supervivencia extrema. 
+    El escenario actual de crisis es: {escenario_actual}.
     Los jugadores son: {', '.join(players)}.
-    REGLA DE ORO: Solo la mitad exacta de estos jugadores puede sobrevivir.
+    REGLA DE ORO: Matemáticamente, solo la mitad exacta de estos jugadores puede sobrevivir en el búnker.
 
-    Aplica estas dinámicas de diseño de roles:
-    1. Distribución Caótica y Equilibrio Tóxico: Mezcla perfiles. Algunos tendrán habilidad vital y defecto catastrófico, otros habilidades secundarias con defectos leves.
-    2. Roles Solapados (Competencia): Crea roles que sirvan para lo mismo pero de distinta forma (ej. dos proveedores de recursos distintos).
-    3. Roles Dependientes: Crea habilidades que necesiten de otro jugador para funcionar.
-    4. Perfiles Tácticos: Las habilidades secundarias (contable, profesor, jardinero) deben tener un discurso de venta brillante.
-    5. Seguridad Interna: Si encaja, asigna a alguien encargado de la fuerza física, el único capaz de lidiar con compañeros peligrosos.
-    
-    Genera para CADA jugador un rol siguiendo ESTRICTAMENTE estas reglas:
-    1. 'habilidad': PRIMERA PERSONA. LARGO (3 o 4 frases), muy detallado y persuasivo.
-    2. 'defecto': SEGUNDA PERSONA. MUY CORTO y directo (1 frase). 
-    3. 'secreto_de_otro': TERCERA PERSONA. MUY CORTO. Es el 'defecto' de OTRO jugador distinto. (Cruza todos los secretos).
-    
-    Además, diseña la SOLUCIÓN IDEAL eligiendo exactamente a la mitad de los jugadores que garantizan la supervivencia a largo plazo.
+    Tu objetivo es generar un debate brutal, estratégico y lleno de paranoia. Diseña los roles aplicando esta lógica de juego:
 
-    Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta, sin texto extra ni formato markdown:
+    1. UTILIDAD TANGIBLE Y ESTRATEGIAS DIVERGENTES: Todos los roles deben aportar un beneficio físico y crítico (nada de roles inútiles), pero con distintos grados de prioridad o reemplazabilidad. Sus habilidades deben proponer DIFERENTES estrategias de supervivencia (ej. atrincheramiento agrícola a largo plazo, militarización agresiva, reparaciones para un escape rápido, dependencia tecnológica, etc.). El grupo tendrá que discutir qué plan de supervivencia adoptar.
+    2. DEFECTOS ALEATORIOS E IMPREDECIBLES: Rompe cualquier patrón lógico. La gravedad del defecto NO debe depender de lo imprescindible que sea el rol. Un jugador vital puede tener un defecto oscurísimo y catastrófico, o simplemente una fobia ridícula e inofensiva. Genera rarezas y defectos extremos de forma totalmente impredecible.
+    3. CHANTAJE ASIMÉTRICO (CLAVE): Para equilibrar los debates, los jugadores con los roles más "prescindibles", de nicho o reemplazables DEBEN ser los que reciban en sus secretos las bombas nucleares (los defectos más graves, oscuros y peligrosos de los jugadores más importantes). Dales a los débiles el conocimiento para extorsionar a los fuertes.
+    4. SINERGIAS COMPLICADAS: Crea dependencias cruzadas y combinaciones de roles que parezcan la salvación absoluta, pero que puedan esconder una trampa condicional o mortal si se eligen juntos. Esto no tiene por que suceder siempre.
+
+    Genera para CADA jugador un rol siguiendo ESTRICTAMENTE estas reglas de formato gramatical y longitud:
+    1. 'rol': El título oficial y técnico del cargo (ej. 'Ingeniero de Sistemas', 'Especialista en Cultivos', 'Guardia Táctico').
+    2. 'habilidad': PRIMERA PERSONA. DIRECTA Y CONTUNDENTE (máximo 2 frases). Simple de entender pero detallando exactamente su aportación TANGIBLE.
+    3. 'defecto': SEGUNDA PERSONA. MUY CORTO y directo (1 frase). 
+    4. 'secreto_de_otro': TERCERA PERSONA. MUY CORTO. Es el 'defecto' de OTRO jugador distinto. Cruza todos los secretos para tejer la red de extorsión.
+
+    Finalmente, diseña la SOLUCIÓN IDEAL SECRETA. Elige exactamente a la mitad de los jugadores que conforman la combinación viable real, determinando qué estrategia era la ganadora y por qué las demás opciones o sinergias obvias eran trampas mortales.
+
+    Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta, sin formato markdown ni texto extra al inicio o final:
     {{
       "jugadores": {{
         "NombreJugador1": {{
-          "habilidad": "texto largo en primera persona...",
-          "defecto": "texto corto en segunda persona...",
-          "secreto_de_otro": "texto corto en tercera persona..."
+          "rol": "Título del cargo",
+          "habilidad": "Texto en primera persona...",
+          "defecto": "Texto en segunda persona...",
+          "secreto_de_otro": "Texto en tercera persona..."
         }}
       }},
       "veredicto_ia": {{
         "supervivientes_ideales": ["Nombre1", "Nombre2"],
-        "explicacion": "Una justificación dramática y detallada de por qué esta combinación era la correcta."
+        "explicacion": "Justificación de qué estrategia era la correcta y por qué esta combinación de jugadores es la única viable."
       }}
     }}
     """
@@ -176,7 +181,7 @@ async def generate_and_distribute_roles(players: list):
             })
     except Exception as e:
         print("Error en IA:", e)
-        await game.broadcast({"type": "error", "message": "Fallo en el Game Master. Intentadlo de nuevo."})
+        await game.broadcast({"type": "error", "message": "Fallo en el Game Master. La IA no ha respondido correctamente, intentadlo de nuevo."})
 
 if __name__ == "__main__":
     import uvicorn
