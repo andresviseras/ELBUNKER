@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Búnker del Caos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-950 text-white font-sans antialiased min-h-screen flex items-center justify-center p-4">
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="w-full max-w-md w-full">
+
+        <!-- PANTALLA 1: LOGIN -->
+        <div id="screen-login" class="fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(239,68,68,0.3)] border border-red-900 text-center">
+            <h1 class="text-3xl font-black text-red-500 mb-2 tracking-wider">☢️ EL BÚNKER</h1>
+            <p class="text-gray-400 mb-8 text-sm">Edición Secretos y Traiciones</p>
+            
+            <div class="space-y-4">
+                <input type="text" id="playerName" placeholder="Tu nombre..." class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all text-center text-lg font-bold">
+                
+                <input type="text" id="roomCode" placeholder="Código de Sala (ej. ABCD)" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all text-center tracking-widest uppercase font-bold">
+                
+                <button onclick="joinRoom()" class="w-full mt-4 bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(220,38,38,0.6)] transition-all text-lg transform hover:scale-105 active:scale-95">
+                    ENTRAR AL BÚNKER
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 2: LOBBY (SALA DE ESPERA) -->
+        <div id="screen-lobby" class="hidden fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(59,130,246,0.3)] border border-blue-900 text-center">
+            <h2 class="text-2xl font-bold text-blue-400 mb-4">Sala: <span id="displayRoom" class="text-white">---</span></h2>
+            
+            <div class="animate-pulse bg-gray-800 rounded-xl p-6 mb-6">
+                <p id="lobbyStatus" class="text-gray-300">Esperando a que el Game Master inicie la partida...</p>
+                <p class="text-sm text-gray-500 mt-2">Mírate las caras con tus amigos mientras podáis.</p>
+                <p class="text-green-400 font-bold mt-4">Jugadores: <span id="playersList">Tú</span></p>
+            </div>
+
+            <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.6)] transition-all text-lg transform hover:scale-105 active:scale-95">
+                ¡EMPEZAR PARTIDA!
+            </button>
+        </div>
+
+        <!-- PANTALLA 3: TU ROL -->
+        <div id="screen-role" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(34,197,94,0.3)] border border-green-700">
+            <h2 class="text-2xl font-black text-center text-green-400 mb-6 tracking-wide">CONFIDENCIAL</h2>
+            
+            <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-blue-500 shadow-md">
+                <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-2">🛠️ Habilidad Vital</h3>
+                <p class="text-gray-200" id="role-skill">...</p>
+            </div>
+
+            <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-red-500 shadow-md">
+                <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-2">⚠️ Defecto Fatal</h3>
+                <p class="text-gray-200" id="role-flaw">...</p>
+            </div>
+
+            <div class="bg-gray-800 rounded-2xl p-5 border-l-4 border-purple-500 shadow-md">
+                <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-2">👁️ El Secreto de Otro</h3>
+                <p class="text-gray-200" id="role-secret">...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let ws;
+        let myName = "";
+
+        function showScreen(screenId) {
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-lobby').classList.add('hidden');
+            document.getElementById('screen-role').classList.add('hidden');
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function joinRoom() {
+            myName = document.getElementById('playerName').value;
+            const room = document.getElementById('roomCode').value;
+            
+            if(!myName || !room) {
+                alert("¡Necesitas poner tu nombre y el código de la sala!");
+                return;
+            }
+
+            document.getElementById('displayRoom').innerText = room.toUpperCase();
+            showScreen('screen-lobby');
+            
+            // Lógica inteligente para saber si usa ws:// (local) o wss:// (internet)
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host; 
+            ws = new WebSocket(`${protocol}//${host}/ws/${myName}`);
+            
+            ws.onmessage = function(event) {
+                const msg = JSON.parse(event.data);
+                
+                if(msg.type === "lobby_update") {
+                    const list = msg.players.join(", ");
+                    document.getElementById('playersList').innerText = list;
+                }
+                
+                if(msg.type === "game_starting") {
+                    document.getElementById('lobbyStatus').innerText = "¡La IA está generando los roles! Preparate...";
+                }
+                
+                if(msg.type === "role_reveal") {
+                    document.getElementById('role-skill').innerText = msg.data.habilidad;
+                    document.getElementById('role-flaw').innerText = msg.data.defecto;
+                    document.getElementById('role-secret').innerText = msg.data.secreto_de_otro;
+                    showScreen('screen-role');
+                }
+            };
+        }
+
+        function startGame() {
+            if(ws) ws.send(JSON.stringify({action: "start_game"}));
+        }
+    </script>
+</body>
+</html>
