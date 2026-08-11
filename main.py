@@ -135,18 +135,19 @@ async def generate_and_distribute_roles(players: list):
 
     Tu objetivo es generar un debate brutal, estratégico y lleno de paranoia. Diseña los roles aplicando esta lógica de juego:
 
-    1. UTILIDAD TANGIBLE Y ESTRATEGIAS DIVERGENTES: Todos los roles deben aportar un beneficio físico y crítico (nada de roles inútiles), pero con distintos grados de prioridad o reemplazabilidad. Sus habilidades deben proponer DIFERENTES estrategias de supervivencia (ej. atrincheramiento agrícola a largo plazo, militarización agresiva, reparaciones para un escape rápido, dependencia tecnológica, etc.). El grupo tendrá que discutir qué plan de supervivencia adoptar.
-    2. DEFECTOS ALEATORIOS E IMPREDECIBLES: Rompe cualquier patrón lógico. La gravedad del defecto NO debe depender de lo imprescindible que sea el rol. Un jugador vital puede tener un defecto oscurísimo y catastrófico, o simplemente una fobia ridícula e inofensiva. Genera rarezas y defectos extremos de forma totalmente impredecible.
-    3. CHANTAJE ASIMÉTRICO (CLAVE): Para equilibrar los debates, los jugadores con los roles más "prescindibles", de nicho o reemplazables DEBEN ser los que reciban en sus secretos las bombas nucleares (los defectos más graves, oscuros y peligrosos de los jugadores más importantes). Dales a los débiles el conocimiento para extorsionar a los fuertes.
-    4. SINERGIAS COMPLICADAS: Crea dependencias cruzadas y combinaciones de roles que parezcan la salvación absoluta, pero que puedan esconder una trampa condicional o mortal si se eligen juntos. Esto no tiene por que suceder siempre.
+    1. HABILIDADES LARGAS Y MULTIUSOS: Todos los roles deben aportar varios beneficios físicos y críticos. La habilidad debe detallar varias razones distintas por las que son útiles para el grupo, dando múltiples argumentos para defender su supervivencia.
+    2. DEFECTOS FUTUROS (EL PELIGRO LATENTE): Los defectos NO deben ser cosas que ya han pasado. Deben ser acciones catastróficas, enfermedades o traiciones que HARÁN o que PASARÁN de forma inevitable UNA VEZ estén dentro del búnker (ej. "Si te dejan entrar, sabotearás...", "Cuando lleves un mes dentro, te volverás loco y...").
+    3. AL MENOS UN PELIGRO LETAL EXTREMO: Entre todos los jugadores, SIEMPRE debe haber al menos un defecto que sea una amenaza de muerte directa para el grupo (un asesino en serie oculto, un psicópata, un traidor que abrirá las puertas al enemigo, o un infectado en fase terminal).
+    4. INTERACCIONES DE NEUTRALIZACIÓN O DETONACIÓN: De forma ocasional, diseña los roles para que la habilidad de un jugador interactúe con el defecto de otro. Puede ser para bien (ej. un psiquiatra que es el único capaz de contener al asesino en serie) o para mal (ej. el trabajo ruidoso del mecánico detona los nervios del jugador inestable).
+    5. RED DE CHANTAJE CIRCULAR (CERO PAREJAS): Está PROHIBIDO cruzar secretos mutuamente (Si A sabe el de B, B no puede saber el de A). Debes crear una cadena de extorsión (A sabe de B, B sabe de C, C sabe de D...). Asegúrate de que los jugadores con los roles más prescindibles reciban los secretos de los jugadores más vitales.
 
     Genera para CADA jugador un rol siguiendo ESTRICTAMENTE estas reglas de formato gramatical y longitud:
-    1. 'rol': El título oficial y técnico del cargo (ej. 'Ingeniero de Sistemas', 'Especialista en Cultivos', 'Guardia Táctico').
-    2. 'habilidad': PRIMERA PERSONA. DIRECTA Y CONTUNDENTE (máximo 2 frases). Simple de entender pero detallando exactamente su aportación TANGIBLE.
-    3. 'defecto': SEGUNDA PERSONA. MUY CORTO y directo (1 frase). 
-    4. 'secreto_de_otro': TERCERA PERSONA. MUY CORTO. Es el 'defecto' de OTRO jugador distinto. Cruza todos los secretos para tejer la red de extorsión.
+    1. 'rol': El título oficial y técnico del cargo (ej. 'Ingeniero de Sistemas', 'Especialista en Cultivos').
+    2. 'habilidad': PRIMERA PERSONA. EXTENSIÓN MEDIA (3 a 5 frases). Da varias razones concretas y detalladas de por qué tu rol es versátil y tu supervivencia es indispensable.
+    3. 'defecto': SEGUNDA PERSONA. MUY CORTO (1 frase). Redactado en FUTURO o CONDICIONAL sobre lo que harás o te pasará dentro.
+    4. 'secreto_de_otro': TERCERA PERSONA. MUY CORTO. Es el 'defecto' de OTRO jugador distinto, respetando estrictamente la cadena circular.
 
-    Finalmente, diseña la SOLUCIÓN IDEAL SECRETA. Elige exactamente a la mitad de los jugadores que conforman la combinación viable real, determinando qué estrategia era la ganadora y por qué las demás opciones o sinergias obvias eran trampas mortales.
+    Finalmente, diseña la SOLUCIÓN IDEAL SECRETA. Elige exactamente a la mitad de los jugadores que conforman la combinación viable real, explicando cómo las interacciones entre ellos neutralizan los peligros o por qué las opciones descartadas eran trampas mortales.
 
     Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta, sin formato markdown ni texto extra al inicio o final:
     {{
@@ -154,13 +155,13 @@ async def generate_and_distribute_roles(players: list):
         "NombreJugador1": {{
           "rol": "Título del cargo",
           "habilidad": "Texto en primera persona...",
-          "defecto": "Texto en segunda persona...",
+          "defecto": "Texto en segunda persona en futuro...",
           "secreto_de_otro": "Texto en tercera persona..."
         }}
       }},
       "veredicto_ia": {{
         "supervivientes_ideales": ["Nombre1", "Nombre2"],
-        "explicacion": "Justificación de qué estrategia era la correcta y por qué esta combinación de jugadores es la única viable."
+        "explicacion": "Explicación detallada de la solución."
       }}
     }}
     """
