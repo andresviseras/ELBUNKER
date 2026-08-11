@@ -77,9 +77,10 @@ async def websocket_endpoint(websocket: WebSocket, player_name: str):
             # Solo el host puede ejecutar las acciones de control
             if player_name == game.host:
                 if msg.get("action") == "start_game":
+                    escenario_elegido = msg.get("escenario")
                     await game.broadcast({"type": "game_starting"})
-                    await generate_and_distribute_roles(list(game.active_players.keys()))
-                    
+                    await generate_and_distribute_roles(list(game.active_players.keys()), escenario_elegido)
+
                 if msg.get("action") == "reveal_verdict":
                     if game.veredicto_secreto:
                         await game.broadcast({
@@ -95,7 +96,7 @@ async def websocket_endpoint(websocket: WebSocket, player_name: str):
             "host": game.host
         })
 
-async def generate_and_distribute_roles(players: list):
+async def generate_and_distribute_roles(players: list, escenario_actual: str):
     if len(players) < 2:
         return
         
@@ -118,7 +119,7 @@ async def generate_and_distribute_roles(players: list):
             })
         return
 
-    escenarios = [
+    """escenarios = [
         "Ha ocurrido un evento apocalíptico masivo. El grupo ha encontrado un refugio seguro, pero el búnker es muy pequeño y no hay espacio para todos. Solo la mitad exacta del grupo podrá cruzar las puertas.",
         "Un invierno nuclear. El sistema de filtrado de aire está gravemente dañado y solo puede depurar el CO2 para mantener viva a la mitad del grupo; si entra una persona más, moriréis asfixiados.",
         "Una pandemia de un virus zombificador. Las reservas de raciones y supresores de infección limitan la supervivencia a exactamente la mitad del grupo.",
@@ -126,12 +127,12 @@ async def generate_and_distribute_roles(players: list):
         "Un colapso ecológico sin agua. El destilador está al límite de su capacidad y el agua reciclada solo da para hidratar a la mitad del grupo sin provocar fallos renales.",
     ]
     escenario_actual = random.choice(escenarios)
-
+"""
     prompt = f"""
     Eres el Game Master implacable de un juego de deducción social y supervivencia extrema. 
     El escenario actual de crisis es: {escenario_actual}.
     Los jugadores son: {', '.join(players)}.
-    REGLA DE ORO: Matemáticamente, solo la mitad exacta de estos jugadores puede sobrevivir en el búnker.
+    REGLA DE ORO: Matemáticamente, solo la mitad exacta de estos jugadores puede sobrevivir en el búnker. (IMPORTANTE: Si el número total de jugadores es impar, redondea la cifra obligatoriamente hacia abajo.)
 
     Tu objetivo es generar un debate brutal, estratégico y lleno de paranoia. Diseña los roles aplicando esta lógica de juego:
 
@@ -139,6 +140,7 @@ async def generate_and_distribute_roles(players: list):
     2. DEFECTOS FUTUROS (EL PELIGRO LATENTE): Los defectos NO deben ser cosas que ya han pasado. Deben ser acciones catastróficas, enfermedades o traiciones que HARÁN o que PASARÁN de forma inevitable UNA VEZ estén dentro del búnker (ej. "Si te dejan entrar, sabotearás...", "Cuando lleves un mes dentro, te volverás loco y...").
     3. AL MENOS UN PELIGRO LETAL EXTREMO: Entre todos los jugadores, SIEMPRE debe haber al menos un defecto que sea una amenaza de muerte directa para el grupo (un asesino en serie oculto, un psicópata, un traidor que abrirá las puertas al enemigo, o un infectado en fase terminal).
     4. INTERACCIONES DE NEUTRALIZACIÓN O DETONACIÓN: De forma ocasional, diseña los roles para que la habilidad de un jugador interactúe con el defecto de otro. Puede ser para bien (ej. un psiquiatra que es el único capaz de contener al asesino en serie) o para mal (ej. el trabajo ruidoso del mecánico detona los nervios del jugador inestable).
+        Si la habilidad de un jugador neutraliza el defecto de otro (y por tanto deben sobrevivir juntos), el MECANISMO EXACTO de esa neutralización DEBE estar escrito explícitamente en el texto de su 'habilidad'. Por ejemplo: si el defecto de A es "robar medicinas", la habilidad de B debe mencionar literalmente que "almacena los recursos en una caja fuerte biométrica inexpugnable". No inventes soluciones en el veredicto final que no estén respaldadas palabra por palabra en los textos de los jugadores.
     5. RED DE CHANTAJE CIRCULAR (CERO PAREJAS): Está PROHIBIDO cruzar secretos mutuamente (Si A sabe el de B, B no puede saber el de A). Debes crear una cadena de extorsión (A sabe de B, B sabe de C, C sabe de D...). Asegúrate de que los jugadores con los roles más prescindibles reciban los secretos de los jugadores más vitales.
 
     Genera para CADA jugador un rol siguiendo ESTRICTAMENTE estas reglas de formato gramatical y longitud:
