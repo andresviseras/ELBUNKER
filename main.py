@@ -127,7 +127,14 @@ async def generate_and_distribute_roles(players: list, escenario_actual: str):
         "Un colapso ecológico sin agua. El destilador está al límite de su capacidad y el agua reciclada solo da para hidratar a la mitad del grupo sin provocar fallos renales.",
     ]
     escenario_actual = random.choice(escenarios)
+
+    
 """
+    # --- AÑADE ESTO PARA ROMPER EL ORDEN ---
+    jugadores_mezclados = players.copy()
+    random.shuffle(jugadores_mezclados)
+    # ---------------------------------------
+    
     prompt = f"""
     Eres el Game Master implacable de un juego de deducción social y supervivencia extrema. 
     El escenario actual de crisis es: {escenario_actual}.
@@ -137,7 +144,7 @@ async def generate_and_distribute_roles(players: list, escenario_actual: str):
     Tu objetivo es generar un debate brutal, estratégico y lleno de paranoia. Diseña los roles aplicando esta lógica de juego:
 
     1. HABILIDADES CONCISAS Y DIRECTAS: Todos los roles deben aportar beneficios físicos y críticos claros, pero sin florituras. Cero relleno literario. Directo al grano.
-    2. DEFECTOS FUTUROS (EL PELIGRO LATENTE): Los defectos NO deben ser cosas que ya han pasado. Deben ser acciones catastróficas, enfermedades o traiciones que HARÁN o que PASARÁN de forma inevitable UNA VEZ estén dentro del búnker (ej. "Si te dejan entrar, sabotearás...", "Cuando lleves un mes dentro, te volverás loco y..."). IMPORTANTE: Desvincula la utilidad de la gravedad. Un rol vital puede tener un defecto inofensivo, y un rol mediocre puede ser la mayor amenaza. ¡Rompe los patrones! Vincula la gravedad de manera impredecible, siempre aleatorio. PROHIBICIÓN ESTRICTA DE CLICHÉS: No uses 'brotes psicóticos', 'robar medicinas/comida', 'cajas fuertes biométricas' ni 'abrir compuertas a la radiación'. Oblígate a inventar amenazas creativas, bizarras o de ciencia ficción dura.
+    2. DEFECTOS FUTUROS (EL PELIGRO LATENTE): Los defectos NO deben ser cosas que ya han pasado. Deben ser acciones catastróficas, enfermedades o traiciones que HARÁN o que PASARÁN de forma inevitable UNA VEZ estén dentro del búnker (ej. "Si te dejan entrar, sabotearás...", "Cuando lleves un mes dentro, te volverás loco y..."). IMPORTANTE: Desvincula la utilidad de la gravedad. Un rol vital puede tener un defecto inofensivo, y un rol mediocre puede ser la mayor amenaza. ¡Rompe los patrones! Vincula la gravedad de manera impredecible, siempre aleatorio. PROHIBICIÓN ESTRICTA DE CLICHÉS: No te limites solo a 'brotes psicóticos', 'robar medicinas/comida', 'cajas fuertes biométricas' ni 'abrir compuertas a la radiación'. ...Oblígate a inventar amenazas creativas y originales, pero que sean fáciles de entender, terrenales y realistas (ej: sectas internas, fobias raras, enfermedades contagiosas reales, chantajes políticos, parásitos, etc.). Evita la jerga técnica excesivamente compleja
     3. AL MENOS UN PELIGRO LETAL EXTREMO: Entre todos los jugadores, SIEMPRE debe haber al menos un defecto que sea una amenaza de muerte directa para el grupo (un asesino en serie oculto, un psicópata, un traidor que abrirá las puertas al enemigo, o un infectado en fase terminal).
     4. INTERACCIONES DE NEUTRALIZACIÓN O DETONACIÓN (SOLO OCASIONALES): DE FORMA OCASIONAL (no en todos los jugadores, solo en unos pocos para añadir estrategia), diseña roles para que la habilidad de un jugador interactúe con el defecto de otro. Puede ser para bien o para mal.
         Si decides que la habilidad de un jugador neutraliza el defecto de otro, el MECANISMO EXACTO de esa neutralización DEBE estar escrito explícitamente en el texto de su 'habilidad'. Por ejemplo: si el defecto de A es "robar", la habilidad de B debe mencionar literalmente que "almacena los recursos en una bóveda de contención magnética inexpugnable". No inventes soluciones en el veredicto final que no estén respaldadas palabra por palabra en los textos de los jugadores.
