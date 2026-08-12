@@ -138,7 +138,7 @@ async def generate_and_distribute_roles(players: list, escenario_actual: str):
     prompt = f"""
     Eres el Game Master implacable de un juego de deducción social y supervivencia extrema. 
     El escenario actual de crisis es: {escenario_actual}.
-    Los jugadores son: {', '.join(players)}.
+    Los jugadores son: {', '.join(jugadores_mezclados)}.
     REGLA DE ORO: Matemáticamente, solo la mitad exacta de estos jugadores puede sobrevivir en el búnker. (IMPORTANTE: Si el número total de jugadores es impar, redondea la cifra obligatoriamente hacia abajo.)
 
     Tu objetivo es generar un debate brutal, estratégico y lleno de paranoia. Diseña los roles aplicando esta lógica de juego:
