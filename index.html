@@ -8,20 +8,29 @@
     <style>
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Custom checkbox styles */
+        .candidate-checkbox:checked + div {
+            background-color: #ef4444;
+            border-color: #ef4444;
+            color: white;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
 <body class="bg-gray-950 text-white font-sans antialiased min-h-screen flex items-center justify-center p-4">
 
     <div class="w-full max-w-md">
-        
-        <div class="flex justify-end mb-4">
-            <select id="lang-select" onchange="changeLanguage()" class="bg-gray-800 text-gray-300 border border-gray-700 rounded-lg p-2 text-sm focus:outline-none focus:border-red-500 font-bold">
-                <option value="es">🇪🇸 ES</option>
-                <option value="en">🇺🇸 EN</option>
-            </select>
-        </div>
 
+        <!-- PANTALLA 1: LOGIN -->
         <div id="screen-login" class="fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(239,68,68,0.3)] border border-red-900 text-center">
+            
+            <div class="flex justify-center mb-6">
+                <select id="lang-select" onchange="changeLanguage()" class="bg-gray-800 text-gray-300 border border-gray-700 rounded-lg p-2 text-sm focus:outline-none focus:border-red-500 font-bold">
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="en">🇺🇸 English</option>
+                </select>
+            </div>
+
             <h1 id="ui-title" class="text-3xl font-black text-red-500 mb-2 tracking-wider">☢️ EL BÚNKER</h1>
             <p id="ui-subtitle" class="text-gray-400 mb-8 text-sm">Edición Secretos y Traiciones</p>
             
@@ -36,10 +45,11 @@
             </div>
         </div>
 
+        <!-- PANTALLA 2: LOBBY -->
         <div id="screen-lobby" class="hidden fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(59,130,246,0.3)] border border-blue-900 text-center">
             <h2 class="text-2xl font-bold text-blue-400 mb-4"><span id="ui-room-label">Sala</span>: <span id="displayRoom" class="text-white">---</span></h2>
             
-            <p class="text-sm text-gray-400 mb-6 uppercase tracking-widest"><span id="ui-agent-label-1">Agente</span>: <span id="displayMyNameLobby" class="text-white font-bold"></span></p>
+            <p class="text-lg text-gray-200 mb-6 uppercase tracking-widest font-black" id="displayMyNameLobby"></p>
 
             <div class="animate-pulse bg-gray-800 rounded-xl p-6 mb-6">
                 <p id="lobbyStatus" class="text-gray-300">Conectado. Esperando jugadores...</p>
@@ -49,9 +59,7 @@
              <div id="host-controls" class="hidden mb-6 text-left bg-gray-800 p-4 rounded-xl border border-blue-900 shadow-inner">
                 <label id="ui-crisis-label" class="block text-blue-400 font-bold text-xs uppercase tracking-wider mb-2">🌍 Selecciona la Crisis:</label>
                 <select id="scenario-select" class="w-full bg-gray-900 text-gray-200 border border-gray-700 rounded-lg p-3 focus:outline-none focus:border-blue-500 font-bold text-sm">
-                    <option value="Ha ocurrido un evento apocalíptico masivo. El grupo ha encontrado un refugio seguro, pero el búnker es muy pequeño y no hay espacio para todos. Solo la mitad exacta del grupo podrá cruzar las puertas.">🔥 Apocalipsis (Clásico)</option>
-                    <option value="Un invierno nuclear. El sistema de filtrado de aire está gravemente dañado y solo puede depurar el CO2 para mantener viva a la mitad del grupo; si entra una persona más, moriréis asfixiados.">❄️ Invierno Nuclear</option>
-                    <option value="Una pandemia de un virus zombificador. Las reservas de raciones limitan la supervivencia a exactamente la mitad del grupo.">🧟 Virus Zombificador</option>
+                    <!-- Dinámico -->
                 </select>
             </div>
 
@@ -63,10 +71,11 @@
             </p>
         </div>
 
+        <!-- PANTALLA 3: TU ROL -->
         <div id="screen-role" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(34,197,94,0.3)] border border-green-700">
             <h2 id="ui-confidential" class="text-2xl font-black text-center text-green-400 mb-6 tracking-wide">CONFIDENCIAL</h2>
             
-            <p class="text-center text-gray-400 text-sm mb-6 uppercase tracking-widest"><span id="ui-agent-label-2">Agente</span>: <span id="displayMyNameRole" class="text-white font-bold"></span></p>
+            <p class="text-center text-gray-200 text-lg mb-6 uppercase tracking-widest font-black" id="displayMyNameRole"></p>
 
             <div class="bg-gray-800 rounded-2xl p-4 mb-6 border border-gray-600 shadow-md">
                 <h3 id="ui-crisis-current" class="text-gray-400 font-bold text-xs uppercase tracking-wider mb-1">🌍 Crisis Actual</h3>
@@ -88,29 +97,62 @@
                 <p class="text-gray-200 text-sm" id="role-secret">...</p>
             </div>
 
-            <button id="btn-end" onclick="revealVerdict()" class="hidden w-full bg-red-700 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg border border-red-500">
-                💀 VER VEREDICTO IA
+            <button id="btn-start-voting" onclick="startVoting()" class="hidden w-full bg-red-700 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg border border-red-500">
+                INICIAR VOTACIÓN
             </button>
-            <p id="text-waiting-end" class="hidden text-center text-gray-400 text-xs mt-2">
-                ⏳ El anfitrión revelará el veredicto tras el debate...
+            <p id="text-waiting-voting" class="hidden text-center text-gray-400 text-xs mt-2">
+                ⏳ Debate. El anfitrión abrirá la votación cuando estéis listos...
             </p>
         </div>
 
-        <div id="screen-verdict" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(234,179,8,0.3)] border border-yellow-600">
-            <h2 id="ui-verdict-title" class="text-3xl font-black text-center text-yellow-500 mb-2 uppercase tracking-widest">El Veredicto</h2>
-            <p id="ui-verdict-sub" class="text-gray-400 text-center text-sm mb-6">Esta era la única solución correcta...</p>
+        <!-- PANTALLA 4: VOTACIÓN -->
+        <div id="screen-voting" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(168,85,247,0.3)] border border-purple-700">
+            <h2 id="ui-voting-title" class="text-3xl font-black text-center text-purple-500 mb-2 tracking-wider">VOTACIÓN</h2>
             
-            <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-yellow-500 shadow-md">
-                <h3 id="ui-ideal-team" class="text-yellow-400 font-bold text-sm uppercase tracking-wider mb-2">🏆 Equipo Ideal</h3>
-                <p class="text-white font-bold text-lg" id="verdict-survivors">...</p>
+            <div id="tie-breaker-banner" class="hidden bg-red-900 text-red-200 font-bold text-center p-2 rounded-lg mb-4 text-sm animate-pulse border border-red-500">
+                ¡EMPATE! SEGUNDA RONDA
             </div>
 
-            <div class="bg-gray-800 rounded-2xl p-5 shadow-md">
-                <h3 id="ui-justification" class="text-gray-400 font-bold text-sm uppercase tracking-wider mb-2">📜 Justificación</h3>
-                <p class="text-gray-300 text-sm leading-relaxed" id="verdict-explanation">...</p>
+            <p class="text-center text-gray-400 text-sm mb-6">
+                <span id="ui-votes-left">Votos disponibles</span>: <span id="votes-counter" class="text-white font-bold text-xl ml-2">0</span>
+            </p>
+
+            <form id="voting-form" class="space-y-3 mb-6">
+                <!-- Dinámico -->
+            </form>
+
+            <button onclick="submitVotes()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.6)] transition-all text-lg">
+                ENVIAR VOTOS
+            </button>
+        </div>
+
+        <!-- PANTALLA 5: ESPERANDO VOTOS -->
+        <div id="screen-waiting" class="hidden fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(255,255,255,0.1)] border border-gray-700 text-center">
+            <div class="inline-block p-4 rounded-full bg-gray-800 mb-4 animate-spin">
+                ⏳
+            </div>
+            <h2 id="ui-waiting-title" class="text-xl font-bold text-gray-200 mb-2">Recopilando Votos...</h2>
+            <p class="text-purple-400 font-black text-2xl mt-4"><span id="votes-received">0</span> / <span id="votes-total">0</span></p>
+            <p id="ui-generating-text" class="hidden text-green-400 font-bold mt-4 animate-pulse">¡IA generando el desenlace final!</p>
+        </div>
+
+        <!-- PANTALLA 6: VEREDICTO -->
+        <div id="screen-verdict" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(234,179,8,0.3)] border border-yellow-600">
+            <h2 id="ui-verdict-title" class="text-3xl font-black text-center text-yellow-500 mb-6 uppercase tracking-widest">RESULTADOS</h2>
+            
+            <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-red-500 shadow-md">
+                <h3 id="ui-voted-team" class="text-red-400 font-bold text-sm uppercase tracking-wider mb-2">🩸 Los Elegidos (Votos)</h3>
+                <p class="text-white font-bold text-lg mb-3" id="verdict-voted-survivors">...</p>
+                <p class="text-gray-300 text-sm leading-relaxed italic" id="verdict-player-outcome">...</p>
+            </div>
+
+            <div class="bg-gray-800 rounded-2xl p-5 mb-6 border-l-4 border-yellow-500 shadow-md">
+                <h3 id="ui-ideal-team" class="text-yellow-400 font-bold text-sm uppercase tracking-wider mb-2">🏆 La Solución IA</h3>
+                <p class="text-white font-bold text-lg mb-3" id="verdict-ai-survivors">...</p>
+                <p class="text-gray-300 text-sm leading-relaxed" id="verdict-ai-smackdown">...</p>
             </div>
             
-            <button id="ui-btn-replay" onclick="location.reload()" class="w-full mt-6 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-all">
+            <button id="ui-btn-replay" onclick="location.reload()" class="w-full mt-2 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-all">
                 VOLVER A JUGAR
             </button>
         </div>
@@ -126,7 +168,6 @@
                 placeholderRoom: "Código de Sala",
                 btnJoin: "ENTRAR AL BÚNKER",
                 roomLabel: "Sala",
-                agentLabel: "Agente",
                 playersLabel: "Jugadores",
                 crisisLabel: "🌍 Selecciona la Crisis:",
                 btnStart: "¡EMPEZAR PARTIDA!",
@@ -135,15 +176,19 @@
                 statusGenerating: "¡La IA está generando los roles! Prepárate...",
                 confidential: "CONFIDENCIAL",
                 crisisCurrent: "🌍 Crisis Actual",
-                skillLabel: "🛠️ Habilidad Vital",
                 flawLabel: "⚠️ Defecto Fatal",
                 secretLabel: "👁️ Secreto de Otro",
-                btnEnd: "💀 VER VEREDICTO IA",
-                waitingEnd: "⏳ El anfitrión revelará el veredicto tras el debate...",
-                verdictTitle: "El Veredicto",
-                verdictSub: "Esta era la única solución correcta...",
-                idealTeam: "🏆 Equipo Ideal",
-                justification: "📜 Justificación",
+                btnStartVoting: "INICIAR VOTACIÓN",
+                waitingVoting: "⏳ Debate. El anfitrión abrirá la votación cuando estéis listos...",
+                votingTitle: "VOTACIÓN",
+                tieBreaker: "¡EMPATE! SEGUNDA RONDA",
+                votesLeft: "Votos disponibles",
+                btnSubmitVotes: "ENVIAR VOTOS",
+                waitingTitle: "Recopilando Votos...",
+                generatingText: "¡IA generando el desenlace final!",
+                verdictTitle: "RESULTADOS",
+                votedTeam: "🩸 Los Elegidos (Votos)",
+                idealTeam: "🏆 La Solución Perfecta (IA)",
                 btnReplay: "VOLVER A JUGAR"
             },
             en: {
@@ -153,7 +198,6 @@
                 placeholderRoom: "Room Code",
                 btnJoin: "ENTER THE BUNKER",
                 roomLabel: "Room",
-                agentLabel: "Agent",
                 playersLabel: "Players",
                 crisisLabel: "🌍 Select the Crisis:",
                 btnStart: "START GAME!",
@@ -162,20 +206,38 @@
                 statusGenerating: "AI is generating roles! Get ready...",
                 confidential: "CONFIDENTIAL",
                 crisisCurrent: "🌍 Current Crisis",
-                skillLabel: "🛠️ Vital Skill",
                 flawLabel: "⚠️ Fatal Flaw",
                 secretLabel: "👁️ Someone Else's Secret",
-                btnEnd: "💀 REVEAL AI VERDICT",
-                waitingEnd: "⏳ The host will reveal the verdict after the debate...",
-                verdictTitle: "The Verdict",
-                verdictSub: "This was the only viable solution...",
-                idealTeam: "🏆 Ideal Team",
-                justification: "📜 Justification",
+                btnStartVoting: "START VOTING",
+                waitingVoting: "⏳ Debate. The host will open the vote when ready...",
+                votingTitle: "VOTING",
+                tieBreaker: "TIE BREAKER! SECOND ROUND",
+                votesLeft: "Votes available",
+                btnSubmitVotes: "SUBMIT VOTES",
+                waitingTitle: "Collecting Votes...",
+                generatingText: "AI generating the final outcome!",
+                verdictTitle: "RESULTS",
+                votedTeam: "🩸 The Chosen (Votes)",
+                idealTeam: "🏆 The Perfect Solution (AI)",
                 btnReplay: "PLAY AGAIN"
             }
         };
 
+        const scenariosDict = {
+            es: [
+                { value: "Ha ocurrido un evento apocalíptico masivo. El grupo ha encontrado un refugio seguro, pero el búnker es muy pequeño y no hay espacio para todos. Solo la mitad exacta del grupo podrá cruzar las puertas.", text: "🔥 Apocalipsis (Clásico)" },
+                { value: "Un invierno nuclear. El sistema de filtrado de aire está gravemente dañado y solo puede depurar el CO2 para mantener viva a la mitad del grupo; si entra una persona más, moriréis asfixiados.", text: "❄️ Invierno Nuclear" },
+                { value: "Una pandemia de un virus zombificador. Las reservas de raciones limitan la supervivencia a exactamente la mitad del grupo.", text: "🧟 Virus Zombificador" }
+            ],
+            en: [
+                { value: "A massive apocalyptic event has occurred. The group found a safe shelter, but the bunker is too small. Only exactly half of the group will be able to enter.", text: "🔥 Apocalypse (Classic)" },
+                { value: "Nuclear winter. The air filtration system is damaged and can only purify CO2 to keep half the group alive; one more person and you all suffocate.", text: "❄️ Nuclear Winter" },
+                { value: "A zombie virus pandemic. Ration reserves limit survival to exactly half of the group.", text: "🧟 Zombie Virus" }
+            ]
+        };
+
         let currentLang = "es";
+        let maxVotesAllowed = 0;
         
         function changeLanguage() {
             currentLang = document.getElementById('lang-select').value;
@@ -187,8 +249,6 @@
             document.getElementById('roomCode').placeholder = t.placeholderRoom;
             document.getElementById('ui-btn-join').innerText = t.btnJoin;
             document.getElementById('ui-room-label').innerText = t.roomLabel;
-            document.getElementById('ui-agent-label-1').innerText = t.agentLabel;
-            document.getElementById('ui-agent-label-2').innerText = t.agentLabel;
             document.getElementById('ui-players-label').innerText = t.playersLabel;
             document.getElementById('ui-crisis-label').innerText = t.crisisLabel;
             document.getElementById('btn-start').innerText = t.btnStart;
@@ -197,17 +257,36 @@
             document.getElementById('ui-crisis-current').innerText = t.crisisCurrent;
             document.getElementById('ui-flaw').innerText = t.flawLabel;
             document.getElementById('ui-secret').innerText = t.secretLabel;
-            document.getElementById('btn-end').innerText = t.btnEnd;
+            document.getElementById('btn-start-voting').innerText = t.btnStartVoting;
+            document.getElementById('ui-voting-title').innerText = t.votingTitle;
+            document.getElementById('tie-breaker-banner').innerText = t.tieBreaker;
+            document.getElementById('ui-votes-left').innerText = t.votesLeft;
+            document.querySelector('#screen-voting button').innerText = t.btnSubmitVotes;
+            document.getElementById('ui-waiting-title').innerText = t.waitingTitle;
+            document.getElementById('ui-generating-text').innerText = t.generatingText;
             document.getElementById('ui-verdict-title').innerText = t.verdictTitle;
-            document.getElementById('ui-verdict-sub').innerText = t.verdictSub;
+            document.getElementById('ui-voted-team').innerText = t.votedTeam;
             document.getElementById('ui-ideal-team').innerText = t.idealTeam;
-            document.getElementById('ui-justification').innerText = t.justification;
             document.getElementById('ui-btn-replay').innerText = t.btnReplay;
             
             if(!document.getElementById('btn-start').classList.contains('hidden') === false) {
                 document.getElementById('text-waiting-host').innerText = t.waitingHost;
             }
+            if(!document.getElementById('btn-start-voting').classList.contains('hidden') === false) {
+                document.getElementById('text-waiting-voting').innerText = t.waitingVoting;
+            }
+
+            const select = document.getElementById('scenario-select');
+            select.innerHTML = '';
+            scenariosDict[currentLang].forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.value;
+                opt.innerText = s.text;
+                select.appendChild(opt);
+            });
         }
+
+        changeLanguage();
 
         let ws;
         let myName = "";
@@ -216,10 +295,9 @@
         let isReconnecting = false;
 
         function showScreen(screenId) {
-            document.getElementById('screen-login').classList.add('hidden');
-            document.getElementById('screen-lobby').classList.add('hidden');
-            document.getElementById('screen-role').classList.add('hidden');
-            document.getElementById('screen-verdict').classList.add('hidden');
+            ['screen-login', 'screen-lobby', 'screen-role', 'screen-voting', 'screen-waiting', 'screen-verdict'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
             document.getElementById(screenId).classList.remove('hidden');
         }
 
@@ -244,11 +322,16 @@
                         document.getElementById('btn-start').classList.remove('hidden');
                         document.getElementById('host-controls').classList.remove('hidden');
                         document.getElementById('text-waiting-host').classList.add('hidden');
+                        document.getElementById('btn-start-voting').classList.remove('hidden');
+                        document.getElementById('text-waiting-voting').classList.add('hidden');
                     } else {
                         document.getElementById('btn-start').classList.add('hidden');
                         document.getElementById('host-controls').classList.add('hidden');
                         document.getElementById('text-waiting-host').classList.remove('hidden');
                         document.getElementById('text-waiting-host').innerText = i18n[currentLang].waitingHost;
+                        document.getElementById('btn-start-voting').classList.add('hidden');
+                        document.getElementById('text-waiting-voting').classList.remove('hidden');
+                        document.getElementById('text-waiting-voting').innerText = i18n[currentLang].waitingVoting;
                     }
                 }
                 
@@ -262,22 +345,61 @@
                     document.getElementById('role-skill').innerText = msg.data.skill;
                     document.getElementById('role-flaw').innerText = msg.data.flaw;
                     document.getElementById('role-secret').innerText = msg.data.secret_of_another;
-                    
-                    if(myName === hostName) {
-                        document.getElementById('btn-end').classList.remove('hidden');
-                        document.getElementById('text-waiting-end').classList.add('hidden');
-                    } else {
-                        document.getElementById('btn-end').classList.add('hidden');
-                        document.getElementById('text-waiting-end').classList.remove('hidden');
-                        document.getElementById('text-waiting-end').innerText = i18n[currentLang].waitingEnd;
-                    }
-                    
                     showScreen('screen-role');
                 }
 
+                if(msg.type === "start_voting" || msg.type === "tie_breaker") {
+                    maxVotesAllowed = msg.votes_allowed;
+                    document.getElementById('votes-counter').innerText = maxVotesAllowed;
+                    
+                    if(msg.type === "tie_breaker") {
+                        document.getElementById('tie-breaker-banner').classList.remove('hidden');
+                    } else {
+                        document.getElementById('tie-breaker-banner').classList.add('hidden');
+                    }
+
+                    const form = document.getElementById('voting-form');
+                    form.innerHTML = '';
+                    
+                    msg.candidates.forEach(c => {
+                        const isMe = c.name === myName;
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <label class="block relative cursor-pointer ${isMe ? 'opacity-50 cursor-not-allowed' : ''}">
+                                <input type="checkbox" name="vote" value="${c.name}" class="candidate-checkbox absolute opacity-0 w-0 h-0" ${isMe ? 'disabled' : ''} onchange="handleCheckboxChange(this)">
+                                <div class="bg-gray-800 border border-gray-600 rounded-xl p-4 flex justify-between items-center transition-all">
+                                    <span class="font-bold text-lg">${c.name}</span>
+                                    <span class="text-xs uppercase tracking-widest opacity-70">${c.role}</span>
+                                </div>
+                            </label>
+                        `;
+                        form.appendChild(div);
+                    });
+                    
+                    if (msg.has_voted) {
+                        showScreen('screen-waiting');
+                    } else {
+                        showScreen('screen-voting');
+                    }
+                }
+
+                if(msg.type === "vote_update") {
+                    document.getElementById('votes-received').innerText = msg.voted_count;
+                    document.getElementById('votes-total').innerText = msg.total;
+                    document.getElementById('ui-generating-text').classList.add('hidden');
+                }
+
+                if(msg.type === "generating_verdict") {
+                    document.getElementById('ui-generating-text').classList.remove('hidden');
+                    showScreen('screen-waiting');
+                }
+
                 if(msg.type === "show_verdict") {
-                    document.getElementById('verdict-survivors').innerText = msg.data.ideal_survivors.join(" - ");
-                    document.getElementById('verdict-explanation').innerText = msg.data.explanation;
+                    document.getElementById('verdict-voted-survivors').innerText = msg.data.player_survivors.join(" - ");
+                    document.getElementById('verdict-player-outcome').innerText = msg.data.player_outcome;
+                    
+                    document.getElementById('verdict-ai-survivors').innerText = msg.data.ai_ideal_survivors.join(" - ");
+                    document.getElementById('verdict-ai-smackdown').innerText = msg.data.ai_smackdown;
                     showScreen('screen-verdict');
                 }
                 
@@ -288,7 +410,6 @@
 
             ws.onclose = function() {
                 if(!isReconnecting) {
-                    document.getElementById('lobbyStatus').innerText = "Reconnecting...";
                     isReconnecting = true;
                     setTimeout(connectWebSocket, 3000);
                 }
@@ -299,9 +420,7 @@
             myName = document.getElementById('playerName').value;
             room = document.getElementById('roomCode').value;
             
-            if(!myName || !room) {
-                return;
-            }
+            if(!myName || !room) return;
 
             document.getElementById('displayRoom').innerText = room.toUpperCase();
             document.getElementById('displayMyNameLobby').innerText = myName;
@@ -322,11 +441,36 @@
             }
         }
 
-        function revealVerdict() {
-            if(confirm(currentLang === 'es' ? "¿Revelar la respuesta de la IA a todo el mundo?" : "Reveal AI answer to everyone?")) {
-                if(ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({action: "reveal_verdict"}));
-                }
+        function startVoting() {
+            if(ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({action: "start_voting"}));
+            }
+        }
+
+        function handleCheckboxChange(cb) {
+            const checkedBoxes = document.querySelectorAll('input[name="vote"]:checked');
+            if(checkedBoxes.length > maxVotesAllowed) {
+                cb.checked = false;
+            }
+            const newCount = maxVotesAllowed - document.querySelectorAll('input[name="vote"]:checked').length;
+            document.getElementById('votes-counter').innerText = newCount;
+        }
+
+        function submitVotes() {
+            const checkedBoxes = document.querySelectorAll('input[name="vote"]:checked');
+            if(checkedBoxes.length === 0) {
+                alert(currentLang === 'es' ? "¡Debes votar al menos a una persona!" : "You must vote for at least one person!");
+                return;
+            }
+            
+            const votes = Array.from(checkedBoxes).map(cb => cb.value);
+            
+            if(ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    action: "submit_votes",
+                    votes: votes
+                }));
+                showScreen('screen-waiting');
             }
         }
     </script>
