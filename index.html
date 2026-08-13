@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,15 +14,13 @@
 
     <div class="w-full max-w-md">
         
-        <!-- SELECTOR DE IDIOMA GLOBAL -->
         <div class="flex justify-end mb-4">
             <select id="lang-select" onchange="changeLanguage()" class="bg-gray-800 text-gray-300 border border-gray-700 rounded-lg p-2 text-sm focus:outline-none focus:border-red-500 font-bold">
-                <option value="es">🇪🇸 Español</option>
-                <option value="en">🇬🇧 English</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="en">🇺🇸 EN</option>
             </select>
         </div>
 
-        <!-- PANTALLA 1: LOGIN -->
         <div id="screen-login" class="fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(239,68,68,0.3)] border border-red-900 text-center">
             <h1 id="ui-title" class="text-3xl font-black text-red-500 mb-2 tracking-wider">☢️ EL BÚNKER</h1>
             <p id="ui-subtitle" class="text-gray-400 mb-8 text-sm">Edición Secretos y Traiciones</p>
@@ -38,7 +36,6 @@
             </div>
         </div>
 
-        <!-- PANTALLA 2: LOBBY -->
         <div id="screen-lobby" class="hidden fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(59,130,246,0.3)] border border-blue-900 text-center">
             <h2 class="text-2xl font-bold text-blue-400 mb-4"><span id="ui-room-label">Sala</span>: <span id="displayRoom" class="text-white">---</span></h2>
             
@@ -66,7 +63,6 @@
             </p>
         </div>
 
-        <!-- PANTALLA 3: TU ROL -->
         <div id="screen-role" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(34,197,94,0.3)] border border-green-700">
             <h2 id="ui-confidential" class="text-2xl font-black text-center text-green-400 mb-6 tracking-wide">CONFIDENCIAL</h2>
             
@@ -100,7 +96,6 @@
             </p>
         </div>
 
-        <!-- PANTALLA 4: VEREDICTO -->
         <div id="screen-verdict" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(234,179,8,0.3)] border border-yellow-600">
             <h2 id="ui-verdict-title" class="text-3xl font-black text-center text-yellow-500 mb-2 uppercase tracking-widest">El Veredicto</h2>
             <p id="ui-verdict-sub" class="text-gray-400 text-center text-sm mb-6">Esta era la única solución correcta...</p>
@@ -123,11 +118,12 @@
     </div>
 
     <script>
-        // --- DICCIONARIO DE INTERNACIONALIZACIÓN (i18n) ---
         const i18n = {
             es: {
                 title: "☢️ EL BÚNKER",
                 subtitle: "Edición Secretos y Traiciones",
+                placeholderName: "Tu nombre...",
+                placeholderRoom: "Código de Sala",
                 btnJoin: "ENTRAR AL BÚNKER",
                 roomLabel: "Sala",
                 agentLabel: "Agente",
@@ -153,6 +149,8 @@
             en: {
                 title: "☢️ THE BUNKER",
                 subtitle: "Secrets & Betrayals Edition",
+                placeholderName: "Your name...",
+                placeholderRoom: "Room Code",
                 btnJoin: "ENTER THE BUNKER",
                 roomLabel: "Room",
                 agentLabel: "Agent",
@@ -185,6 +183,8 @@
             
             document.getElementById('ui-title').innerText = t.title;
             document.getElementById('ui-subtitle').innerText = t.subtitle;
+            document.getElementById('playerName').placeholder = t.placeholderName;
+            document.getElementById('roomCode').placeholder = t.placeholderRoom;
             document.getElementById('ui-btn-join').innerText = t.btnJoin;
             document.getElementById('ui-room-label').innerText = t.roomLabel;
             document.getElementById('ui-agent-label-1').innerText = t.agentLabel;
@@ -204,13 +204,11 @@
             document.getElementById('ui-justification').innerText = t.justification;
             document.getElementById('ui-btn-replay').innerText = t.btnReplay;
             
-            // Actualizar textos dinámicos si la pantalla está visible
             if(!document.getElementById('btn-start').classList.contains('hidden') === false) {
                 document.getElementById('text-waiting-host').innerText = t.waitingHost;
             }
         }
 
-        // --- LÓGICA DE WEBSOCKET Y JUEGO ---
         let ws;
         let myName = "";
         let room = "";
@@ -260,7 +258,6 @@
                 
                 if(msg.type === "role_reveal") {
                     document.getElementById('role-scenario').innerText = msg.scenario;
-                    // Uso de las nuevas variables en inglés del backend
                     document.getElementById('role-title-display').innerText = "🛠️ " + msg.data.role.toUpperCase();
                     document.getElementById('role-skill').innerText = msg.data.skill;
                     document.getElementById('role-flaw').innerText = msg.data.flaw;
@@ -279,22 +276,19 @@
                 }
 
                 if(msg.type === "show_verdict") {
-                    // Uso de las nuevas variables en inglés del backend
                     document.getElementById('verdict-survivors').innerText = msg.data.ideal_survivors.join(" - ");
                     document.getElementById('verdict-explanation').innerText = msg.data.explanation;
                     showScreen('screen-verdict');
                 }
                 
                 if(msg.type === "error") {
-                    alert("⚠️ ERROR: " + msg.message);
-                    document.getElementById('lobbyStatus').innerText = "Hubo un error. Vuelve a intentarlo.";
+                    alert("Error: " + msg.message);
                 }
             };
 
-            // Lógica de reconexión automática si el servidor o la red fallan
             ws.onclose = function() {
                 if(!isReconnecting) {
-                    document.getElementById('lobbyStatus').innerText = "Conexión perdida. Reconectando...";
+                    document.getElementById('lobbyStatus').innerText = "Reconnecting...";
                     isReconnecting = true;
                     setTimeout(connectWebSocket, 3000);
                 }
@@ -306,7 +300,6 @@
             room = document.getElementById('roomCode').value;
             
             if(!myName || !room) {
-                alert("¡Necesitas poner tu nombre y el código de la sala!");
                 return;
             }
 
@@ -319,12 +312,11 @@
         }
 
         function startGame() {
-            const escenarioElegido = document.getElementById('scenario-select').value;
-            // Se envía la variable language al backend
+            const chosenScenario = document.getElementById('scenario-select').value;
             if(ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({
                     action: "start_game", 
-                    scenario: escenarioElegido,
+                    scenario: chosenScenario,
                     language: currentLang
                 }));
             }

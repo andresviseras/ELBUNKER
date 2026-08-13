@@ -1,84 +1,60 @@
 import os
 import json
 import random
-import google.generativeai as genai
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from typing import Dict, List, Optional
-# Make sure to run: pip install python-dotenv
+from google import genai
+from google.genai import types
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
-    # In production (Render), if dotenv is missing, it will gracefully ignore this 
-    # and read directly from the Render Environment Variables dashboard.
     pass 
 
-# CONFIGURATION
-# Set to True ONLY for local testing without using API quota.
-# Keep as False for production deployment.
 MOCK_MODE = False
 
-# Security: Read the key from environment variables
 api_key = os.environ.get("GEMINI_API_KEY")
-if not api_key and not MOCK_MODE:
-    print("WARNING: GEMINI_API_KEY is missing!")
-
-genai.configure(api_key=api_key)
-
-# Using the recommended model for complex reasoning
-model = genai.GenerativeModel('gemini-3.5-flash') # Updated to a standard naming convention if applicable, or keep 3.5 if using preview
+client = genai.Client(api_key=api_key) if api_key else None
 
 app = FastAPI()
 
 class GameManager:
-    """
-    Manages WebSocket connections, game state, and player sessions.
-    """
     def __init__(self):
         self.active_players: Dict[str, WebSocket] = {}
         self.host: Optional[str] = None
         self.secret_verdict: Optional[Dict] = None
-        
-        # State management for reconnections
-        self.game_phase: str = "lobby"  # Phases: 'lobby', 'playing', 'verdict'
+        self.game_phase: str = "lobby"
         self.player_roles: Dict[str, Dict] = {}
         self.current_scenario: str = ""
 
     async def connect(self, websocket: WebSocket, name: str) -> None:
-        """Accepts a new connection and assigns host if necessary."""
         await websocket.accept()
         self.active_players[name] = websocket
-        
         if not self.host:
             self.host = name
 
     def disconnect(self, name: str) -> None:
-        """Removes a player from active connections and reassigns host if needed."""
         if name in self.active_players:
             del self.active_players[name]
-        
         if name == self.host:
             self.host = list(self.active_players.keys())[0] if self.active_players else None
 
     async def broadcast(self, message: dict) -> None:
-        """Sends a message to all connected players."""
         for connection in self.active_players.values():
             try:
                 await connection.send_json(message)
             except Exception:
-                pass # Handle broken pipes silently
+                pass
 
     async def send_personal(self, name: str, message: dict) -> None:
-        """Sends a message to a specific player."""
         if name in self.active_players:
             try:
                 await self.active_players[name].send_json(message)
             except Exception:
                 pass
 
-
-# Initialize the global game manager
 game = GameManager()
 
 @app.get("/")
@@ -89,7 +65,6 @@ async def get_index():
 async def websocket_endpoint(websocket: WebSocket, player_name: str):
     await game.connect(websocket, player_name)
     
-    # RECONNECTION LOGIC: Check if game is already running
     if game.game_phase == "playing" and player_name in game.player_roles:
         await game.send_personal(player_name, {
             "type": "role_reveal",
@@ -102,7 +77,6 @@ async def websocket_endpoint(websocket: WebSocket, player_name: str):
             "data": game.secret_verdict
         })
     
-    # Always update the lobby for everyone
     await game.broadcast({
         "type": "lobby_update", 
         "players": list(game.active_players.keys()),
@@ -114,11 +88,10 @@ async def websocket_endpoint(websocket: WebSocket, player_name: str):
             data = await websocket.receive_text()
             msg = json.loads(data)
             
-            # Restrict game control actions to the host
             if player_name == game.host:
                 if msg.get("action") == "start_game":
                     chosen_scenario = msg.get("scenario", "Default scenario")
-                    game_language = msg.get("language", "en") # Receives language from frontend
+                    game_language = msg.get("language", "en")
                     
                     game.current_scenario = chosen_scenario
                     game.game_phase = "playing"
@@ -147,15 +120,10 @@ async def websocket_endpoint(websocket: WebSocket, player_name: str):
         })
 
 async def generate_and_distribute_roles(players: List[str], current_scenario: str, language: str) -> None:
-    """
-    Calls the Gemini API to generate roles based on the scenario and language,
-    then distributes them to the active players.
-    """
     if len(players) < 2:
         return
         
-    if MOCK_MODE:
-        print(f"Generating roles in MOCK MODE... (Language: {language})")
+    if MOCK_MODE or not client:
         game.secret_verdict = {
             "ideal_survivors": [players[0], players[1]],
             "explanation": "This is a mock explanation. The winning strategy was A."
@@ -177,7 +145,6 @@ async def generate_and_distribute_roles(players: List[str], current_scenario: st
             })
         return
 
-    # Shuffle players to randomize the secret/flaw chain
     shuffled_players = players.copy()
     random.shuffle(shuffled_players)
     
@@ -223,11 +190,17 @@ async def generate_and_distribute_roles(players: List[str], current_scenario: st
     """
     
     try:
-        response = model.generate_content(prompt, generation_config={"temperature": 0.9})
+        response = client.models.generate_content(
+            model='gemini-3.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.9,
+            )
+        )
+        
         raw_json = response.text.replace("```json", "").replace("```", "").strip()
         data = json.loads(raw_json)
         
-        # Save state in memory for reconnections
         game.secret_verdict = data.get("ai_verdict")
         game.player_roles = data.get("players", {})
         
