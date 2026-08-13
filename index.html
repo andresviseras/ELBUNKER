@@ -12,19 +12,27 @@
 </head>
 <body class="bg-gray-950 text-white font-sans antialiased min-h-screen flex items-center justify-center p-4">
 
-    <div class="w-full max-w-md w-full">
+    <div class="w-full max-w-md">
+        
+        <!-- SELECTOR DE IDIOMA GLOBAL -->
+        <div class="flex justify-end mb-4">
+            <select id="lang-select" onchange="changeLanguage()" class="bg-gray-800 text-gray-300 border border-gray-700 rounded-lg p-2 text-sm focus:outline-none focus:border-red-500 font-bold">
+                <option value="es">🇪🇸 Español</option>
+                <option value="en">🇬🇧 English</option>
+            </select>
+        </div>
 
         <!-- PANTALLA 1: LOGIN -->
         <div id="screen-login" class="fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(239,68,68,0.3)] border border-red-900 text-center">
-            <h1 class="text-3xl font-black text-red-500 mb-2 tracking-wider">☢️ EL BÚNKER</h1>
-            <p class="text-gray-400 mb-8 text-sm">Edición Secretos y Traiciones</p>
+            <h1 id="ui-title" class="text-3xl font-black text-red-500 mb-2 tracking-wider">☢️ EL BÚNKER</h1>
+            <p id="ui-subtitle" class="text-gray-400 mb-8 text-sm">Edición Secretos y Traiciones</p>
             
             <div class="space-y-4">
                 <input type="text" id="playerName" placeholder="Tu nombre..." class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 transition-all text-center text-lg font-bold">
                 
                 <input type="text" id="roomCode" placeholder="Código de Sala" class="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 transition-all text-center tracking-widest uppercase font-bold">
                 
-                <button onclick="joinRoom()" class="w-full mt-4 bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(220,38,38,0.6)] transition-all text-lg transform hover:scale-105 active:scale-95">
+                <button id="ui-btn-join" onclick="joinRoom()" class="w-full mt-4 bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(220,38,38,0.6)] transition-all text-lg transform hover:scale-105 active:scale-95">
                     ENTRAR AL BÚNKER
                 </button>
             </div>
@@ -32,26 +40,21 @@
 
         <!-- PANTALLA 2: LOBBY -->
         <div id="screen-lobby" class="hidden fade-in bg-gray-900 rounded-3xl p-8 shadow-[0_0_20px_rgba(59,130,246,0.3)] border border-blue-900 text-center">
-            <h2 class="text-2xl font-bold text-blue-400 mb-4">Sala: <span id="displayRoom" class="text-white">---</span></h2>
+            <h2 class="text-2xl font-bold text-blue-400 mb-4"><span id="ui-room-label">Sala</span>: <span id="displayRoom" class="text-white">---</span></h2>
             
-            <p class="text-sm text-gray-400 mb-6 uppercase tracking-widest">Agente: <span id="displayMyNameLobby" class="text-white font-bold"></span></p>
+            <p class="text-sm text-gray-400 mb-6 uppercase tracking-widest"><span id="ui-agent-label-1">Agente</span>: <span id="displayMyNameLobby" class="text-white font-bold"></span></p>
 
             <div class="animate-pulse bg-gray-800 rounded-xl p-6 mb-6">
                 <p id="lobbyStatus" class="text-gray-300">Conectado. Esperando jugadores...</p>
-                <p class="text-green-400 font-bold mt-4">Jugadores: <span id="playersList" class="text-white"></span></p>
+                <p class="text-green-400 font-bold mt-4"><span id="ui-players-label">Jugadores</span>: <span id="playersList" class="text-white"></span></p>
             </div>
 
-            <!-- Controles dinámicos de Host -->
              <div id="host-controls" class="hidden mb-6 text-left bg-gray-800 p-4 rounded-xl border border-blue-900 shadow-inner">
-                <label class="block text-blue-400 font-bold text-xs uppercase tracking-wider mb-2">🌍 Selecciona la Crisis:</label>
+                <label id="ui-crisis-label" class="block text-blue-400 font-bold text-xs uppercase tracking-wider mb-2">🌍 Selecciona la Crisis:</label>
                 <select id="scenario-select" class="w-full bg-gray-900 text-gray-200 border border-gray-700 rounded-lg p-3 focus:outline-none focus:border-blue-500 font-bold text-sm">
                     <option value="Ha ocurrido un evento apocalíptico masivo. El grupo ha encontrado un refugio seguro, pero el búnker es muy pequeño y no hay espacio para todos. Solo la mitad exacta del grupo podrá cruzar las puertas.">🔥 Apocalipsis (Clásico)</option>
-                    <option value="Un invierno nuclear. El sistema de filtrado de aire está gravemente dañado y solo puede depurar el CO2 para mantener viva a la mitad del grupo; si entra una persona más, moriréis asfixiados.">❄️ Invierno Nuclear (Filtros de Aire)</option>
-                    <option value="Una pandemia de un virus zombificador. Las reservas de raciones y supresores de infección limitan la supervivencia a exactamente la mitad del grupo.">🧟 Virus Zombificador (Raciones)</option>
-                    <option value="Una rebelión de inteligencias artificiales. El generador del viejo búnker es débil y colapsará si detecta el peso y calor de más de la mitad de vosotros.">🤖 Rebelión IA (Sobrecarga)</option>
-                    <option value="Un colapso ecológico sin agua. El destilador está al límite de su capacidad y el agua reciclada solo da para hidratar a la mitad del grupo sin provocar fallos renales.">💧 Colapso Ecológico (Sin Agua)</option>
-                    <option value="La superficie ha ardido y habéis huido a una base submarina a 10.000 metros de profundidad. El casco está dañado y los estabilizadores de presión implosionarán instantáneamente si la biomasa supera el equivalente a la mitad exacta del grupo.">🌊 Base Submarina (Presión Crítica)</option>
-                    <option value="El apocalipsis ha llegado, pero el búnker está controlado por la IA de una Comunidad de Vecinos extremadamente estricta. Los estatutos dicen: 'Aforo máximo: la mitad del grupo'. Si entra uno más, la IA activará los aspersores de ácido.">🏢 Comunidad de Vecinos (Humor)</option>
+                    <option value="Un invierno nuclear. El sistema de filtrado de aire está gravemente dañado y solo puede depurar el CO2 para mantener viva a la mitad del grupo; si entra una persona más, moriréis asfixiados.">❄️ Invierno Nuclear</option>
+                    <option value="Una pandemia de un virus zombificador. Las reservas de raciones limitan la supervivencia a exactamente la mitad del grupo.">🧟 Virus Zombificador</option>
                 </select>
             </div>
 
@@ -65,13 +68,12 @@
 
         <!-- PANTALLA 3: TU ROL -->
         <div id="screen-role" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(34,197,94,0.3)] border border-green-700">
-            <h2 class="text-2xl font-black text-center text-green-400 mb-6 tracking-wide">CONFIDENCIAL</h2>
+            <h2 id="ui-confidential" class="text-2xl font-black text-center text-green-400 mb-6 tracking-wide">CONFIDENCIAL</h2>
             
-            <!-- NUEVA LÍNEA PARA EL NOMBRE -->
-            <p class="text-center text-gray-400 text-sm mb-6 uppercase tracking-widest">Agente: <span id="displayMyNameRole" class="text-white font-bold"></span></p>
+            <p class="text-center text-gray-400 text-sm mb-6 uppercase tracking-widest"><span id="ui-agent-label-2">Agente</span>: <span id="displayMyNameRole" class="text-white font-bold"></span></p>
 
             <div class="bg-gray-800 rounded-2xl p-4 mb-6 border border-gray-600 shadow-md">
-                <h3 class="text-gray-400 font-bold text-xs uppercase tracking-wider mb-1">🌍 Crisis Actual</h3>
+                <h3 id="ui-crisis-current" class="text-gray-400 font-bold text-xs uppercase tracking-wider mb-1">🌍 Crisis Actual</h3>
                 <p class="text-gray-200 text-sm italic" id="role-scenario">...</p>
             </div>
 
@@ -81,16 +83,15 @@
             </div>
 
             <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-red-500 shadow-md">
-                <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-2">⚠️ Defecto Fatal</h3>
+                <h3 id="ui-flaw" class="text-red-400 font-bold text-sm uppercase tracking-wider mb-2">⚠️ Defecto Fatal</h3>
                 <p class="text-gray-200 text-sm" id="role-flaw">...</p>
             </div>
 
             <div class="bg-gray-800 rounded-2xl p-5 mb-6 border-l-4 border-purple-500 shadow-md">
-                <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-2">👁️ Secreto de Otro</h3>
+                <h3 id="ui-secret" class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-2">👁️ Secreto de Otro</h3>
                 <p class="text-gray-200 text-sm" id="role-secret">...</p>
             </div>
 
-            <!-- Controles dinámicos de Host -->
             <button id="btn-end" onclick="revealVerdict()" class="hidden w-full bg-red-700 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg border border-red-500">
                 💀 VER VEREDICTO IA
             </button>
@@ -101,20 +102,20 @@
 
         <!-- PANTALLA 4: VEREDICTO -->
         <div id="screen-verdict" class="hidden fade-in bg-gray-900 rounded-3xl p-6 shadow-[0_0_20px_rgba(234,179,8,0.3)] border border-yellow-600">
-            <h2 class="text-3xl font-black text-center text-yellow-500 mb-2 uppercase tracking-widest">El Veredicto</h2>
-            <p class="text-gray-400 text-center text-sm mb-6">Esta era la única solución correcta...</p>
+            <h2 id="ui-verdict-title" class="text-3xl font-black text-center text-yellow-500 mb-2 uppercase tracking-widest">El Veredicto</h2>
+            <p id="ui-verdict-sub" class="text-gray-400 text-center text-sm mb-6">Esta era la única solución correcta...</p>
             
             <div class="bg-gray-800 rounded-2xl p-5 mb-4 border-l-4 border-yellow-500 shadow-md">
-                <h3 class="text-yellow-400 font-bold text-sm uppercase tracking-wider mb-2">🏆 Equipo Ideal</h3>
+                <h3 id="ui-ideal-team" class="text-yellow-400 font-bold text-sm uppercase tracking-wider mb-2">🏆 Equipo Ideal</h3>
                 <p class="text-white font-bold text-lg" id="verdict-survivors">...</p>
             </div>
 
             <div class="bg-gray-800 rounded-2xl p-5 shadow-md">
-                <h3 class="text-gray-400 font-bold text-sm uppercase tracking-wider mb-2">📜 Justificación</h3>
+                <h3 id="ui-justification" class="text-gray-400 font-bold text-sm uppercase tracking-wider mb-2">📜 Justificación</h3>
                 <p class="text-gray-300 text-sm leading-relaxed" id="verdict-explanation">...</p>
             </div>
             
-            <button onclick="location.reload()" class="w-full mt-6 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-all">
+            <button id="ui-btn-replay" onclick="location.reload()" class="w-full mt-6 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-all">
                 VOLVER A JUGAR
             </button>
         </div>
@@ -122,9 +123,99 @@
     </div>
 
     <script>
+        // --- DICCIONARIO DE INTERNACIONALIZACIÓN (i18n) ---
+        const i18n = {
+            es: {
+                title: "☢️ EL BÚNKER",
+                subtitle: "Edición Secretos y Traiciones",
+                btnJoin: "ENTRAR AL BÚNKER",
+                roomLabel: "Sala",
+                agentLabel: "Agente",
+                playersLabel: "Jugadores",
+                crisisLabel: "🌍 Selecciona la Crisis:",
+                btnStart: "¡EMPEZAR PARTIDA!",
+                waitingHost: "Esperando a que el anfitrión inicie la partida...",
+                statusConnected: "Conectado. Esperando jugadores...",
+                statusGenerating: "¡La IA está generando los roles! Prepárate...",
+                confidential: "CONFIDENCIAL",
+                crisisCurrent: "🌍 Crisis Actual",
+                skillLabel: "🛠️ Habilidad Vital",
+                flawLabel: "⚠️ Defecto Fatal",
+                secretLabel: "👁️ Secreto de Otro",
+                btnEnd: "💀 VER VEREDICTO IA",
+                waitingEnd: "⏳ El anfitrión revelará el veredicto tras el debate...",
+                verdictTitle: "El Veredicto",
+                verdictSub: "Esta era la única solución correcta...",
+                idealTeam: "🏆 Equipo Ideal",
+                justification: "📜 Justificación",
+                btnReplay: "VOLVER A JUGAR"
+            },
+            en: {
+                title: "☢️ THE BUNKER",
+                subtitle: "Secrets & Betrayals Edition",
+                btnJoin: "ENTER THE BUNKER",
+                roomLabel: "Room",
+                agentLabel: "Agent",
+                playersLabel: "Players",
+                crisisLabel: "🌍 Select the Crisis:",
+                btnStart: "START GAME!",
+                waitingHost: "Waiting for the host to start the game...",
+                statusConnected: "Connected. Waiting for players...",
+                statusGenerating: "AI is generating roles! Get ready...",
+                confidential: "CONFIDENTIAL",
+                crisisCurrent: "🌍 Current Crisis",
+                skillLabel: "🛠️ Vital Skill",
+                flawLabel: "⚠️ Fatal Flaw",
+                secretLabel: "👁️ Someone Else's Secret",
+                btnEnd: "💀 REVEAL AI VERDICT",
+                waitingEnd: "⏳ The host will reveal the verdict after the debate...",
+                verdictTitle: "The Verdict",
+                verdictSub: "This was the only viable solution...",
+                idealTeam: "🏆 Ideal Team",
+                justification: "📜 Justification",
+                btnReplay: "PLAY AGAIN"
+            }
+        };
+
+        let currentLang = "es";
+        
+        function changeLanguage() {
+            currentLang = document.getElementById('lang-select').value;
+            const t = i18n[currentLang];
+            
+            document.getElementById('ui-title').innerText = t.title;
+            document.getElementById('ui-subtitle').innerText = t.subtitle;
+            document.getElementById('ui-btn-join').innerText = t.btnJoin;
+            document.getElementById('ui-room-label').innerText = t.roomLabel;
+            document.getElementById('ui-agent-label-1').innerText = t.agentLabel;
+            document.getElementById('ui-agent-label-2').innerText = t.agentLabel;
+            document.getElementById('ui-players-label').innerText = t.playersLabel;
+            document.getElementById('ui-crisis-label').innerText = t.crisisLabel;
+            document.getElementById('btn-start').innerText = t.btnStart;
+            document.getElementById('lobbyStatus').innerText = t.statusConnected;
+            document.getElementById('ui-confidential').innerText = t.confidential;
+            document.getElementById('ui-crisis-current').innerText = t.crisisCurrent;
+            document.getElementById('ui-flaw').innerText = t.flawLabel;
+            document.getElementById('ui-secret').innerText = t.secretLabel;
+            document.getElementById('btn-end').innerText = t.btnEnd;
+            document.getElementById('ui-verdict-title').innerText = t.verdictTitle;
+            document.getElementById('ui-verdict-sub').innerText = t.verdictSub;
+            document.getElementById('ui-ideal-team').innerText = t.idealTeam;
+            document.getElementById('ui-justification').innerText = t.justification;
+            document.getElementById('ui-btn-replay').innerText = t.btnReplay;
+            
+            // Actualizar textos dinámicos si la pantalla está visible
+            if(!document.getElementById('btn-start').classList.contains('hidden') === false) {
+                document.getElementById('text-waiting-host').innerText = t.waitingHost;
+            }
+        }
+
+        // --- LÓGICA DE WEBSOCKET Y JUEGO ---
         let ws;
         let myName = "";
+        let room = "";
         let hostName = "";
+        let isReconnecting = false;
 
         function showScreen(screenId) {
             document.getElementById('screen-login').classList.add('hidden');
@@ -134,9 +225,85 @@
             document.getElementById(screenId).classList.remove('hidden');
         }
 
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host; 
+            ws = new WebSocket(`${protocol}//${host}/ws/${myName}`);
+            
+            ws.onopen = function() {
+                isReconnecting = false;
+                document.getElementById('lobbyStatus').innerText = i18n[currentLang].statusConnected;
+            };
+
+            ws.onmessage = function(event) {
+                const msg = JSON.parse(event.data);
+                
+                if(msg.type === "lobby_update") {
+                    document.getElementById('playersList').innerText = msg.players.join(", ");
+                    hostName = msg.host;
+                    
+                    if(myName === hostName) {
+                        document.getElementById('btn-start').classList.remove('hidden');
+                        document.getElementById('host-controls').classList.remove('hidden');
+                        document.getElementById('text-waiting-host').classList.add('hidden');
+                    } else {
+                        document.getElementById('btn-start').classList.add('hidden');
+                        document.getElementById('host-controls').classList.add('hidden');
+                        document.getElementById('text-waiting-host').classList.remove('hidden');
+                        document.getElementById('text-waiting-host').innerText = i18n[currentLang].waitingHost;
+                    }
+                }
+                
+                if(msg.type === "game_starting") {
+                    document.getElementById('lobbyStatus').innerText = i18n[currentLang].statusGenerating;
+                }
+                
+                if(msg.type === "role_reveal") {
+                    document.getElementById('role-scenario').innerText = msg.scenario;
+                    // Uso de las nuevas variables en inglés del backend
+                    document.getElementById('role-title-display').innerText = "🛠️ " + msg.data.role.toUpperCase();
+                    document.getElementById('role-skill').innerText = msg.data.skill;
+                    document.getElementById('role-flaw').innerText = msg.data.flaw;
+                    document.getElementById('role-secret').innerText = msg.data.secret_of_another;
+                    
+                    if(myName === hostName) {
+                        document.getElementById('btn-end').classList.remove('hidden');
+                        document.getElementById('text-waiting-end').classList.add('hidden');
+                    } else {
+                        document.getElementById('btn-end').classList.add('hidden');
+                        document.getElementById('text-waiting-end').classList.remove('hidden');
+                        document.getElementById('text-waiting-end').innerText = i18n[currentLang].waitingEnd;
+                    }
+                    
+                    showScreen('screen-role');
+                }
+
+                if(msg.type === "show_verdict") {
+                    // Uso de las nuevas variables en inglés del backend
+                    document.getElementById('verdict-survivors').innerText = msg.data.ideal_survivors.join(" - ");
+                    document.getElementById('verdict-explanation').innerText = msg.data.explanation;
+                    showScreen('screen-verdict');
+                }
+                
+                if(msg.type === "error") {
+                    alert("⚠️ ERROR: " + msg.message);
+                    document.getElementById('lobbyStatus').innerText = "Hubo un error. Vuelve a intentarlo.";
+                }
+            };
+
+            // Lógica de reconexión automática si el servidor o la red fallan
+            ws.onclose = function() {
+                if(!isReconnecting) {
+                    document.getElementById('lobbyStatus').innerText = "Conexión perdida. Reconectando...";
+                    isReconnecting = true;
+                    setTimeout(connectWebSocket, 3000);
+                }
+            };
+        }
+
         function joinRoom() {
             myName = document.getElementById('playerName').value;
-            const room = document.getElementById('roomCode').value;
+            room = document.getElementById('roomCode').value;
             
             if(!myName || !room) {
                 alert("¡Necesitas poner tu nombre y el código de la sala!");
@@ -146,84 +313,28 @@
             document.getElementById('displayRoom').innerText = room.toUpperCase();
             document.getElementById('displayMyNameLobby').innerText = myName;
             document.getElementById('displayMyNameRole').innerText = myName;
+            
             showScreen('screen-lobby');
-            
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const host = window.location.host; 
-            ws = new WebSocket(`${protocol}//${host}/ws/${myName}`);
-            
-            ws.onmessage = function(event) {
-                const msg = JSON.parse(event.data);
-                
-                if(msg.type === "lobby_update") {
-                    document.getElementById('playersList').innerText = msg.players.join(", ");
-                    hostName = msg.host;
-                    
-                    // Mostrar botones y menú solo al Host
-                    if(myName === hostName) {
-                        document.getElementById('btn-start').classList.remove('hidden');
-                        document.getElementById('host-controls').classList.remove('hidden');
-                        document.getElementById('text-waiting-host').classList.add('hidden');
-                    } else {
-                        document.getElementById('btn-start').classList.add('hidden');
-                        document.getElementById('host-controls').classList.add('hidden');
-                        document.getElementById('text-waiting-host').classList.remove('hidden');
-                        document.getElementById('text-waiting-host').innerText = `Esperando a que ${hostName} elija la crisis...`;
-                    }
-                }
-                
-                if(msg.type === "game_starting") {
-                    document.getElementById('lobbyStatus').innerText = "¡La IA está generando los roles! Preparate...";
-                }
-                
-                if(msg.type === "role_reveal") {
-                    // Inyectar el escenario actual
-                    document.getElementById('role-scenario').innerText = msg.escenario;
-                    // Inyectar el título del rol dinámicamente
-                    document.getElementById('role-title-display').innerText = "🛠️ Habilidad: " + msg.data.rol.toUpperCase();
-                    
-                    document.getElementById('role-skill').innerText = msg.data.habilidad;
-                    document.getElementById('role-flaw').innerText = msg.data.defecto;
-                    document.getElementById('role-secret').innerText = msg.data.secreto_de_otro;
-                    
-                    // Lógica del host para la pantalla de rol
-                    if(myName === hostName) {
-                        document.getElementById('btn-end').classList.remove('hidden');
-                        document.getElementById('text-waiting-end').classList.add('hidden');
-                    } else {
-                        document.getElementById('btn-end').classList.add('hidden');
-                        document.getElementById('text-waiting-end').classList.remove('hidden');
-                        document.getElementById('text-waiting-end').innerText = `Solo ${hostName} puede terminar el debate.`;
-                    }
-                    
-                    showScreen('screen-role');
-                }
-
-                if(msg.type === "show_verdict") {
-                    document.getElementById('verdict-survivors').innerText = msg.data.supervivientes_ideales.join(" - ");
-                    document.getElementById('verdict-explanation').innerText = msg.data.explicacion;
-                    showScreen('screen-verdict');
-                }
-                
-                // Manejo de errores visuales en el frontend
-                if(msg.type === "error") {
-                    alert("⚠️ ERROR: " + msg.message);
-                    document.getElementById('lobbyStatus').innerText = "Hubo un error. Vuelve a intentarlo.";
-                }
-            };
+            connectWebSocket();
         }
 
         function startGame() {
             const escenarioElegido = document.getElementById('scenario-select').value;
-            if(ws) ws.send(JSON.stringify({
-                action: "start_game", 
-                escenario: escenarioElegido
-            }));
+            // Se envía la variable language al backend
+            if(ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    action: "start_game", 
+                    scenario: escenarioElegido,
+                    language: currentLang
+                }));
+            }
         }
 
         function revealVerdict() {
-            if(confirm("¿Habéis terminado de votar? Esto revelará la respuesta de la IA a todo el mundo.")) {
-                if(ws) ws.send(JSON.stringify({action: "reveal_verdict"}));
+            if(confirm(currentLang === 'es' ? "¿Revelar la respuesta de la IA a todo el mundo?" : "Reveal AI answer to everyone?")) {
+                if(ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({action: "reveal_verdict"}));
+                }
             }
         }
     </script>
