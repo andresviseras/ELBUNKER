@@ -6,10 +6,13 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from typing import Dict, List, Optional
 # Make sure to run: pip install python-dotenv
-from dotenv import load_dotenv 
-
-# Load environment variables from a .env file for local development
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # In production (Render), if dotenv is missing, it will gracefully ignore this 
+    # and read directly from the Render Environment Variables dashboard.
+    pass 
 
 # CONFIGURATION
 # Set to True ONLY for local testing without using API quota.
@@ -24,7 +27,7 @@ if not api_key and not MOCK_MODE:
 genai.configure(api_key=api_key)
 
 # Using the recommended model for complex reasoning
-model = genai.GenerativeModel('gemini-1.5-flash') # Updated to a standard naming convention if applicable, or keep 3.5 if using preview
+model = genai.GenerativeModel('gemini-3.5-flash') # Updated to a standard naming convention if applicable, or keep 3.5 if using preview
 
 app = FastAPI()
 
