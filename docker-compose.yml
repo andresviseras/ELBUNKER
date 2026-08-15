@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  api:
+    # Construye la imagen usando el Dockerfile de la raíz
+    build: .
+    # Nombra el contenedor para identificarlo fácilmente
+    container_name: bunker_backend
+    # Mapea el puerto de tu máquina (izq) al del contenedor (der)
+    ports:
+      - "8000:8000"
+    # Carga automáticamente tu archivo de variables secretas
+    env_file:
+      - .env
+    # Asegura que Python imprima los logs en tiempo real sin almacenarlos en búfer
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PORT=8000
+    # Permite que el contenedor se reinicie solo si falla
+    restart: unless-stopped

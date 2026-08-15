@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>El Búnker del Caos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -53,7 +53,7 @@
 
             <div class="animate-pulse bg-gray-800 rounded-xl p-6 mb-6">
                 <p id="lobbyStatus" class="text-gray-300">Conectado. Esperando jugadores...</p>
-                <p class="text-green-400 font-bold mt-4"><span id="ui-players-label">Jugadores</span>: <span id="playersList" class="text-white"></span></p>
+                <p class="text-green-400 font-bold mt-4"><span id="ui-players-label">Jugadores activos</span>: <span id="playersList" class="text-white"></span></p>
             </div>
 
              <div id="host-controls" class="hidden mb-6 text-left bg-gray-800 p-4 rounded-xl border border-blue-900 shadow-inner">
@@ -160,66 +160,29 @@
     </div>
 
     <script>
+        // --- DICCIONARIO E IDIOMAS ---
         const i18n = {
             es: {
-                title: "☢️ EL BÚNKER",
-                subtitle: "Edición Secretos y Traiciones",
-                placeholderName: "Tu nombre...",
-                placeholderRoom: "Código de Sala",
-                btnJoin: "ENTRAR AL BÚNKER",
-                roomLabel: "Sala",
-                playersLabel: "Jugadores",
-                crisisLabel: "🌍 Selecciona la Crisis:",
-                btnStart: "¡EMPEZAR PARTIDA!",
-                waitingHost: "Esperando a que el anfitrión inicie la partida...",
-                statusConnected: "Conectado. Esperando jugadores...",
-                statusGenerating: "¡La IA está generando los roles! Prepárate...",
-                confidential: "CONFIDENCIAL",
-                crisisCurrent: "🌍 Crisis Actual",
-                flawLabel: "⚠️ Defecto Fatal",
-                secretLabel: "👁️ Secreto de Otro",
-                btnStartVoting: "INICIAR VOTACIÓN",
-                waitingVoting: "⏳ Debate. El anfitrión abrirá la votación cuando estéis listos...",
-                votingTitle: "VOTACIÓN",
-                tieBreaker: "¡EMPATE! SEGUNDA RONDA",
-                votesLeft: "Votos disponibles",
-                btnSubmitVotes: "ENVIAR VOTOS",
-                waitingTitle: "Recopilando Votos...",
-                generatingText: "¡IA generando el desenlace final!",
-                verdictTitle: "RESULTADOS",
-                votedTeam: "🩸 Los Elegidos (Votos)",
-                idealTeam: "🏆 La Solución Perfecta (IA)",
-                btnReplay: "VOLVER A JUGAR"
+                title: "☢️ EL BÚNKER", subtitle: "Edición Secretos y Traiciones", placeholderName: "Tu nombre...", placeholderRoom: "Código de Sala",
+                btnJoin: "ENTRAR AL BÚNKER", roomLabel: "Sala", playersLabel: "Jugadores activos", crisisLabel: "🌍 Selecciona la Crisis:",
+                btnStart: "¡EMPEZAR PARTIDA!", waitingHost: "Esperando a que el anfitrión inicie la partida...", statusConnected: "Conectado. Esperando jugadores...",
+                statusGenerating: "¡La IA está generando los roles! Prepárate...", confidential: "CONFIDENCIAL", crisisCurrent: "🌍 Crisis Actual",
+                flawLabel: "⚠️ Defecto Fatal", secretLabel: "👁️ Secreto de Otro", btnStartVoting: "INICIAR VOTACIÓN",
+                waitingVoting: "⏳ Debate. El anfitrión abrirá la votación cuando estéis listos...", votingTitle: "VOTACIÓN",
+                tieBreaker: "¡EMPATE! SEGUNDA RONDA", votesLeft: "Votos disponibles", btnSubmitVotes: "ENVIAR VOTOS",
+                waitingTitle: "Recopilando Votos...", generatingText: "¡IA generando el desenlace final!", verdictTitle: "RESULTADOS",
+                votedTeam: "🩸 Los Elegidos (Votos)", idealTeam: "🏆 La Solución Perfecta (IA)", btnReplay: "VOLVER A JUGAR"
             },
             en: {
-                title: "☢️ THE BUNKER",
-                subtitle: "Secrets & Betrayals Edition",
-                placeholderName: "Your name...",
-                placeholderRoom: "Room Code",
-                btnJoin: "ENTER THE BUNKER",
-                roomLabel: "Room",
-                playersLabel: "Players",
-                crisisLabel: "🌍 Select the Crisis:",
-                btnStart: "START GAME!",
-                waitingHost: "Waiting for the host to start the game...",
-                statusConnected: "Connected. Waiting for players...",
-                statusGenerating: "AI is generating roles! Get ready...",
-                confidential: "CONFIDENTIAL",
-                crisisCurrent: "🌍 Current Crisis",
-                flawLabel: "⚠️ Fatal Flaw",
-                secretLabel: "👁️ Someone Else's Secret",
-                btnStartVoting: "START VOTING",
-                waitingVoting: "⏳ Debate. The host will open the vote when ready...",
-                votingTitle: "VOTING",
-                tieBreaker: "TIE BREAKER! SECOND ROUND",
-                votesLeft: "Votes available",
-                btnSubmitVotes: "SUBMIT VOTES",
-                waitingTitle: "Collecting Votes...",
-                generatingText: "AI generating the final outcome!",
-                verdictTitle: "RESULTS",
-                votedTeam: "🩸 The Chosen (Votes)",
-                idealTeam: "🏆 The Perfect Solution (AI)",
-                btnReplay: "PLAY AGAIN"
+                title: "☢️ THE BUNKER", subtitle: "Secrets & Betrayals Edition", placeholderName: "Your name...", placeholderRoom: "Room Code",
+                btnJoin: "ENTER THE BUNKER", roomLabel: "Room", playersLabel: "Active Players", crisisLabel: "🌍 Select the Crisis:",
+                btnStart: "START GAME!", waitingHost: "Waiting for the host to start the game...", statusConnected: "Connected. Waiting for players...",
+                statusGenerating: "AI is generating roles! Get ready...", confidential: "CONFIDENTIAL", crisisCurrent: "🌍 Current Crisis",
+                flawLabel: "⚠️ Fatal Flaw", secretLabel: "👁️ Someone Else's Secret", btnStartVoting: "START VOTING",
+                waitingVoting: "⏳ Debate. The host will open the vote when ready...", votingTitle: "VOTING",
+                tieBreaker: "TIE BREAKER! SECOND ROUND", votesLeft: "Votes available", btnSubmitVotes: "SUBMIT VOTES",
+                waitingTitle: "Collecting Votes...", generatingText: "AI generating the final outcome!", verdictTitle: "RESULTS",
+                votedTeam: "🩸 The Chosen (Votes)", idealTeam: "🏆 The Perfect Solution (AI)", btnReplay: "PLAY AGAIN"
             }
         };
 
@@ -288,11 +251,18 @@
 
         changeLanguage();
 
+        // --- SISTEMA DE WEBSOCKET RESILIENTE ---
         let ws;
-        let myName = "";
-        let room = "";
+        let myName = localStorage.getItem('bunker_playerName') || "";
+        let room = localStorage.getItem('bunker_roomCode') || "";
         let hostName = "";
-        let isReconnecting = false;
+        
+        let reconnectAttempts = 0;
+        const maxReconnectDelay = 10000;
+
+        // Autocompletar si ya había datos guardados
+        if(myName) document.getElementById('playerName').value = myName;
+        if(room) document.getElementById('roomCode').value = room;
 
         function showScreen(screenId) {
             ['screen-login', 'screen-lobby', 'screen-role', 'screen-voting', 'screen-waiting', 'screen-verdict'].forEach(id => {
@@ -304,10 +274,13 @@
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const host = window.location.host; 
+            
+            // Usamos myName como identificador único (asegúrate de que en backend lo traten como ID)
             ws = new WebSocket(`${protocol}//${host}/ws/${myName}`);
             
             ws.onopen = function() {
-                isReconnecting = false;
+                console.log("🟢 Conexión establecida");
+                reconnectAttempts = 0; // Reiniciamos el contador al tener éxito
                 document.getElementById('lobbyStatus').innerText = i18n[currentLang].statusConnected;
             };
 
@@ -315,7 +288,9 @@
                 const msg = JSON.parse(event.data);
                 
                 if(msg.type === "lobby_update") {
-                    document.getElementById('playersList').innerText = msg.players.join(", ");
+                    // Usamos msg.active_players para mostrar solo a los conectados
+                    const displayPlayers = msg.active_players ? msg.active_players.join(", ") : msg.players.join(", ");
+                    document.getElementById('playersList').innerText = displayPlayers;
                     hostName = msg.host;
                     
                     if(myName === hostName) {
@@ -409,18 +384,27 @@
             };
 
             ws.onclose = function() {
-                if(!isReconnecting) {
-                    isReconnecting = true;
-                    setTimeout(connectWebSocket, 3000);
-                }
+                console.warn("🔴 Conexión perdida. Iniciando reconexión automática...");
+                
+                // Exponential Backoff para no saturar el servidor si cae
+                const delay = Math.min(maxReconnectDelay, (Math.pow(2, reconnectAttempts) - 1) * 1000);
+                
+                setTimeout(() => {
+                    reconnectAttempts++;
+                    connectWebSocket();
+                }, delay);
             };
         }
 
         function joinRoom() {
-            myName = document.getElementById('playerName').value;
-            room = document.getElementById('roomCode').value;
+            myName = document.getElementById('playerName').value.trim();
+            room = document.getElementById('roomCode').value.trim();
             
             if(!myName || !room) return;
+
+            // Persistencia de sesión
+            localStorage.setItem('bunker_playerName', myName);
+            localStorage.setItem('bunker_roomCode', room);
 
             document.getElementById('displayRoom').innerText = room.toUpperCase();
             document.getElementById('displayMyNameLobby').innerText = myName;

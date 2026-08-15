@@ -1,3 +1,15 @@
+# Entornos Virtuales
 venv/
-__pycache__/
+env/
+.venv/
+
+# Variables de Entorno (¡Crítico!)
 .env
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac OS
+.DS_Store
