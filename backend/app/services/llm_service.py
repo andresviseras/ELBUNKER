@@ -105,6 +105,9 @@ async def generate_final_verdict(game_language: str, current_scenario: str, play
     1. Explain exactly what happens to the players' chosen team inside the bunker. Detail how their specific flaws ruin their survival. (Or if they somehow survive, make it clear it is a miserable existence).
     2. Arrogantly remind them why YOUR ideal team ({ideal_survivors}) was the logically superior choice based on their specific skills and flaws.
     
+     CRITICAL FORMATTING RULE: 
+        - All text values inside the JSON MUST be written in a single continuous line. 
+        - STRICTLY FORBIDDEN: Do NOT use unescaped double quotes, and do NOT use physical line breaks or newline characters (\\n) inside the text strings. Keep every description as a single paragraph.
     Return ONLY a valid JSON with this exact structure, with no markdown formatting or extra text:
     {{
       "player_outcome": "Narrative of what happens to the voted team...",
