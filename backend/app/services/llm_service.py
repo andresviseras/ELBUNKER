@@ -28,6 +28,7 @@ async def generate_and_distribute_roles(players: list[str], current_scenario: st
     3. AT LEAST ONE LETHAL THREAT: Among all players, there MUST ALWAYS be at least one flaw that is a direct death threat to the group (e.g., asymptomatic carrier of a plague, an infiltrated spy, a serial killer).
     4. NEUTRALIZATION INTERACTIONS (OCCASIONAL): OCCASIONALLY, design roles so that one player's skill interacts with another's flaw. If a skill neutralizes or detonates a flaw, the EXACT MECHANISM must be explicitly written in the 'skill' text without revealing any secret.
     5. CIRCULAR BLACKMAIL NETWORK (NO COUPLES): It is FORBIDDEN to cross secrets mutually (If A knows B's secret, B cannot know A's). You must create a circular extortion chain (A knows B, B knows C, C knows D...). IMPORTANT: Disconnect neutralizations from secrets. A player CANNOT receive the secret of the person their skill neutralizes.
+    6. REDUNDANCY & NO MONOPOLIES (CRITICAL): There must NEVER be absolute monopolies on essential survival needs. At least TWO different players must have overlapping or backup capabilities for critical infrastructure (e.g., two people who can handle water/oxygen, or two people who understand energy/maintenance). This ensures that no single person is completely irreplaceable, forcing the group to weigh risks and flaws rather than just checking off required job titles.
 
     Generate a role for EACH player strictly following this format:
     1. 'role': The official job title.
